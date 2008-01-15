@@ -18,9 +18,9 @@ class MechaSimModel
     
     # ground
     body = @world.createBody
-    geom = ODE::Geometry::Box.new(100,1,100,@space)
+    geom = ODE::Geometry::Box.new(1000,10,1000,@space)
     geom.body = body
-    body.position = [-50,1,-50]
+    body.position = [-500,10,-500]
   end
   
   def update
@@ -36,7 +36,9 @@ class MechaSimModel
         contact.surface.mu = 5000
         j = @joints.createJoint(contact)
         j.attach(g1.body, g2.body)
+        break
         }
+      break
       }
     }
     

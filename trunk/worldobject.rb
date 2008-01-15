@@ -7,19 +7,15 @@ class WorldObject
   def initialize(w,s)
     @world,@space = w,s
     @body = @world.createBody
-    #mass = ODE::Mass::Box.new(1,1,1,1)
+    mass = ODE::Mass
     #mass.adjust(1)
     #@body.mass = mass
     #puts @body.mass
     #puts @body.force
-    @geom = ODE::Geometry::Box.new(1,1,1,@space)
+    @geom = ODE::Geometry::Box.new(10,10,10,@space)
     @geom.body = @body
     @body.position = [0,-10,0]
     puts "initial pos: #{@body.position}"
-  end
-  
-  def handle_collision
-    
   end
   
 end
