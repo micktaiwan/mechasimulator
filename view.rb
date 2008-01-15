@@ -3,7 +3,7 @@ require 'rubygems'
 require 'rubygame'
 require 'opengl'
 
-class RobotSimView
+class MechaSimView
   
   def initialize(model)
     @model = model
@@ -13,19 +13,33 @@ class RobotSimView
   end
   
   def update
+    
+    @queue.each { |event|
+      puts "Event: #{event}, #{event.class.name}"  if CONFIG[:log][:event]
+      @@running = nil if event.class.name == "Rubygame::QuitEvent"
+    }
+    
     GL::Clear(GL::COLOR_BUFFER_BIT)
-    draw_quad(@model.robot.x,@model.robot.y,10) 
+    #puts @model.space.inspect
+    @model.space.each { |geom|
+      draw_geom(geom) 
+    }
     Rubygame::GL.swap_buffers()
   end
   
   private
   
-  def draw_quad(x,y,w)
+  def draw_geom(geom)
+    puts geom.position.to_s  if CONFIG[:log][:pos]
+    draw_box(geom.position.x+320,geom.position.y+240, 10)
+  end
+  
+  def draw_box(x,y,z)
     GL::Begin(GL::QUADS)
     GL::Vertex(x, y)
-    GL::Vertex(x, y+w)
-    GL::Vertex(x+w, y+w)
-    GL::Vertex(x+w, y)
+    GL::Vertex(x, y+z)
+    GL::Vertex(x+z, y+z)
+    GL::Vertex(x+z, y)
     GL::End()
   end
   
