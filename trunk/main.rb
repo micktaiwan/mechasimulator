@@ -2,12 +2,12 @@ require 'view'
 require 'model'
 require 'controller'
 
-class RobotSim
+class MechaSim
   
   def initialize
-    @m = RobotSimModel.new
-    @v = RobotSimView.new(@m)
-    @c = RobotSimController.new(@m,@v)
+    @m = MechaSimModel.new
+    @v = MechaSimView.new(@m)
+    @c = MechaSimController.new(@m,@v)
   end
   
   def loop
@@ -32,7 +32,7 @@ end
 Rubygame.init()
 begin
   @@running = true
-  RobotSim.new.loop
+  MechaSim.new.loop
 rescue Exception => e
   @@running = nil
   puts "Error: " + e.message

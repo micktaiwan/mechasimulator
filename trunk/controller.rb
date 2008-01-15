@@ -3,11 +3,16 @@ require 'joystick'
 require 'config'
 
 # takes inputs and update view and model
-class RobotSimController
+class MechaSimController
   
   def initialize(model,view)
     @model, @view = model, view
-    @joy = Joystick::Device.new CONFIG[:joy][:dev]
+    begin
+      @joy = Joystick::Device.new CONFIG[:joy][:dev]
+    rescue Exception => e
+      puts "*** Can not find the joystick '#{CONFIG[:joy][:dev]}'\n    (#{e.message})\n    Please edit your configuration file config.rb"
+      exit 1
+    end
     #TODO catch errors
   end
   
@@ -24,25 +29,25 @@ class RobotSimController
     ev = @joy.ev
     case ev.type
     when Joystick::Event::INIT
-      puts 'init'
+      puts 'init' if CONFIG[:log][:joy]
     when Joystick::Event::BUTTON
-      puts "button: #{ev.num}, #{ev.val}"
+      puts "button: #{ev.num}, #{ev.val}" if CONFIG[:log][:joy]
     when Joystick::Event::AXIS
-      #puts "axis: #{ev.num}, #{ev.val}"
+      puts "axis: #{ev.num}, #{ev.val}" if CONFIG[:log][:joy]
       case ev.num
       when CONFIG[:joy][:axe1x]
-        @model.joy1x = ev.val / 32000.0
-        puts "x=#{@model.joy1x}"
+        @model.joy1x = ev.val / (32000.0/8)
+        puts "x=#{@model.joy1x}"  if CONFIG[:log][:joy]
       when CONFIG[:joy][:axe1y]
-        @model.joy1y = ev.val / 32000.0
-        puts "y=#{@model.joy1y}"
+        @model.joy1y = ev.val / (32000.0/8)
+        puts "y=#{@model.joy1y}" if CONFIG[:log][:joy]
       when CONFIG[:joy][:axe2x] 
         #@model.joy2y = ev.val / 100
       when CONFIG[:joy][:axe2y]
         #@model.joy2x = ev.val / 100
       end
     else
-      puts "? #{ev.type}"
+      puts "Unknown type #{ev.type}" if CONFIG[:log][:joy]
     end    
   end
   
