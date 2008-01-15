@@ -31,15 +31,33 @@ class MechaSimView
   
   def draw_geom(geom)
     puts geom.position.to_s  if CONFIG[:log][:pos]
-    draw_box(geom.position.x+320,geom.position.y+240, 10)
+    #draw_box(geom.position.x+320,geom.position.y+240, 10)
+    draw_box(geom)
   end
   
-  def draw_box(x,y,z)
+  def draw_box(geom)
+    x = geom.position.x + 320
+    y = geom.position.y + 240
+    z = geom.position.z
+    lx = geom.lx
+    ly = geom.ly
+    lz = geom.lz
+    
     GL::Begin(GL::QUADS)
+    # face
     GL::Vertex(x, y)
-    GL::Vertex(x, y+z)
-    GL::Vertex(x+z, y+z)
-    GL::Vertex(x+z, y)
+    GL::Vertex(x+lx, y)
+    GL::Vertex(x+lx, y+ly)
+    GL::Vertex(x, y+ly)
+    GL::End()
+  end
+
+  def draw_simple_box(x,y,w)
+    GL::Begin(GL::QUADS)
+    GL::Vertex(x, w)
+    GL::Vertex(x, y+w)
+    GL::Vertex(x+w, y+w)
+    GL::Vertex(x+w, y)
     GL::End()
   end
   
