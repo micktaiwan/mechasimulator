@@ -36,15 +36,15 @@ class MechaSimController
       puts "axis: #{ev.num}, #{ev.val}" if CONFIG[:log][:joy]
       case ev.num
       when CONFIG[:joy][:axe1x]
-        @model.joy1x = ev.val / (32000.0/8)
+        @model.joy1x = ev.val / CONFIG[:joy][:factor]
         puts "x=#{@model.joy1x}"  if CONFIG[:log][:joy]
       when CONFIG[:joy][:axe1y]
-        @model.joy1y = ev.val / (32000.0/8)
+        @model.joy1y = ev.val / CONFIG[:joy][:factor]
         puts "y=#{@model.joy1y}" if CONFIG[:log][:joy]
       when CONFIG[:joy][:axe2x] 
-        #@model.joy2y = ev.val / 100
+        @model.joy2x = ev.val / CONFIG[:joy][:factor]
       when CONFIG[:joy][:axe2y]
-        #@model.joy2x = ev.val / 100
+        @model.joy2y = ev.val  / CONFIG[:joy][:factor]
       end
     else
       puts "Unknown type #{ev.type}" if CONFIG[:log][:joy]
