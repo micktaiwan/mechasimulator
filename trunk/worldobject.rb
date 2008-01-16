@@ -15,7 +15,7 @@ class WorldObject
     #puts @body.force
     @geom = ODE::Geometry::Box.new(10,10,10,@space)
     @geom.body = @body
-    @body.position = [0,-10,0]
+    @body.position = [0,10,0]
     puts "initial pos: #{@body.position}"
   end
   
