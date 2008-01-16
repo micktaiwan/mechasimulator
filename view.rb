@@ -25,6 +25,7 @@ class MechaSimView
       draw_geom(geom) 
     }
     Rubygame::GL.swap_buffers()
+    
   end
   
   private
@@ -43,13 +44,20 @@ class MechaSimView
     ly = geom.ly
     lz = geom.lz
     
+    GL::PushMatrix()
+    
     GL::Begin(GL::QUADS)
-    # face
+    # front
     GL::Vertex(x, y)
     GL::Vertex(x+lx, y)
     GL::Vertex(x+lx, y+ly)
     GL::Vertex(x, y+ly)
+    
+    # TODO other faces
+    
     GL::End()
+
+    GL::PopMatrix()
   end
 
   def draw_simple_box(x,y,w)

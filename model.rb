@@ -1,5 +1,5 @@
 require 'worldobject'
-STEP = 0.2
+STEP = 0.05
 
 class MechaSimModel
   
@@ -9,7 +9,7 @@ class MechaSimModel
   def initialize
     @joy1x, @joy1y, @joy2x, @joy2y = 0,0,0,0
     @world = ODE::World.new
-    #@world.gravity = [0,9.81,0]
+    @world.gravity = [0,9.81,0]
     @space = ODE::Space.new
     @joints = ODE::JointGroup.new(ODE::ContactJoint,@world)
     
@@ -17,15 +17,15 @@ class MechaSimModel
     @robot = WorldObject.new(@world,@space)
     
     # ground
-    body = @world.createBody
+    #body = @world.createBody
     geom = ODE::Geometry::Box.new(1000,10,1000,@space)
-    geom.body = body
-    body.position = [-500,10,-500]
+    #geom.body = body
+    geom.position = [-500,10,-500]
   end
   
   def update
     # apply forces
-    @robot.body.addForce([@joy1x,@joy1y,0])
+    @robot.body.addForce([@joy1x,@joy1y,@joy2y])
     
     # collision    
     @space.each { |g1|
@@ -36,9 +36,7 @@ class MechaSimModel
         contact.surface.mu = 5000
         j = @joints.createJoint(contact)
         j.attach(g1.body, g2.body)
-        break
         }
-      break
       }
     }
     

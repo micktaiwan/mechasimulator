@@ -7,7 +7,8 @@ class WorldObject
   def initialize(w,s)
     @world,@space = w,s
     @body = @world.createBody
-    mass = ODE::Mass
+    #mass = ODE::Mass
+    #mass.
     #mass.adjust(1)
     #@body.mass = mass
     #puts @body.mass
