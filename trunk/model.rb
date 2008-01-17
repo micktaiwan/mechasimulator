@@ -27,22 +27,23 @@ class MechaSimModel
   end
   
   def update
-    # apply forces
-    #@robot.body.addForce([@joy1x,-@joy1y,@joy2y])
-    @cam.pos[:x] += @joy1x /100.0
-    @cam.pos[:y] += @joy1y /100.0
-    @cam.pos[:z] += @joy2y /100.0
     
-    
+    case CONFIG[:joy][:control]
+    when 'robot'
+      # apply forces
+      @robot.body.addForce([@joy1x,-@joy1y,@joy2y])
+    when 'camera'    
+      @cam.move(@joy1x,-@joy1y,@joy2y)
+    end
     # collision    
     @space.each { |g1|
       @space.each { |g2|
         g1.collideWith(g2) { |contact|
-        puts contact.to_s if CONFIG[:log][:collision]
-        contact.surface.bounce = 0.2
-        contact.surface.mu = 5000
-        j = @joints.createJoint(contact)
-        j.attach(g1.body, g2.body)
+          puts contact.to_s if CONFIG[:log][:collision]
+          contact.surface.bounce = 0.2
+          contact.surface.mu = 5000
+          j = @joints.createJoint(contact)
+          j.attach(g1.body, g2.body)
         }
       }
     }
