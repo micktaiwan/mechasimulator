@@ -18,15 +18,20 @@ class MVector
     MVector.new(@x+v.x,@y+v.y,@z+v.z)
   end
   
+  def *( scalar )
+    scalar = Float(scalar)
+    MVector.new(@x*scalar,@y*scalar,@z*scalar)
+  end
+  
   def rotate(a,b,c)
-    @x = @x*Math.cos(a/1000)-@y*Math.sin(a/1000)
-    @y = @y*Math.cos(a/1000)-@x*Math.sin(a/1000)
+    @x = @x*Math.cos(a)-@y*Math.sin(a)
+    @y = @y*Math.cos(a)-@x*Math.sin(a)
     
-    @x = @x*Math.cos(b/1000)-@z*Math.sin(b/1000)
-    @z = @z*Math.cos(b/1000)-@x*Math.sin(b/1000)
+    @x = @x*Math.cos(b)-@z*Math.sin(b)
+    @z = @z*Math.cos(b)-@x*Math.sin(b)
     
-    @y = @y*Math.cos(c/1000)-@z*Math.sin(c/1000)
-    @z = @z*Math.cos(c/1000)-@y*Math.sin(c/1000)
+    @y = @y*Math.cos(c)-@z*Math.sin(c)
+    @z = @z*Math.cos(c)-@y*Math.sin(c)
   end
   
 end
