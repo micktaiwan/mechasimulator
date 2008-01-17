@@ -146,7 +146,7 @@ class MechaSimView
     # Projection
     GL::MatrixMode(GL::PROJECTION)
     GL::LoadIdentity()
-    #GLU::Perspective(40.0,1.333 , 0.1, 100.0);
+    GLU::Perspective(45.0,1.333 , 0.01, 5000.0);
     #GLU::Perspective (45,1.3333,0.2,20)
     GL::Ortho(-1000,1000,-1000,1000,-1000,1000)
     

@@ -16,7 +16,7 @@ class WorldObject
     @geom = ODE::Geometry::Box.new(50,50,50,@space)
     @geom.body = @body
     @body.position = [0,200,0]
-    puts "initial pos: #{@body.position}"
+    puts "initial body pos: #{@body.position}"
   end
   
 end
