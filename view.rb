@@ -1,6 +1,4 @@
 require 'model'
-require 'rubygems'
-require 'rubygame'
 require 'opengl'
 
 class MechaSimView
@@ -8,24 +6,17 @@ class MechaSimView
   def initialize(model)
     @model = model
     @screen = screen_make(640,480)
-    @queue = Rubygame::EventQueue.new()
     set_gl
   end
   
   def update
     
-    # events
-    @queue.each { |event|
-      puts "Event: #{event}, #{event.class.name}"  if CONFIG[:log][:event]
-      @@running = nil if event.class.name == "Rubygame::QuitEvent"
-    }
-
     # camera
     GL::Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
     GL::LoadIdentity();
-    GLU::LookAt(@model.cam.pos[:x], @model.cam.pos[:y], @model.cam.pos[:z],
-                @model.cam.view[:x],@model.cam.view[:y],@model.cam.view[:z],
-                @model.cam.rot[:x], @model.cam.rot[:y], @model.cam.rot[:z])
+    GLU::LookAt(@model.cam.pos.x, @model.cam.pos.y, @model.cam.pos.z,
+                @model.cam.view.x,@model.cam.view.y,@model.cam.view.z,
+                @model.cam.rot.x, @model.cam.rot.y, @model.cam.rot.z)
     
     # draw geometries
     @model.space.each { |geom|
@@ -73,27 +64,42 @@ class MechaSimView
     GL::PushMatrix()
     
     GL::Begin(GL::QUADS)
-    # front
-    GL::Color(1,0,0)
+    # back
+    GL::Color(0,0,1)
     GL::Vertex3d(x,y,z)
     GL::Vertex3d(x+lx, y,z)
     GL::Vertex3d(x+lx, y+ly,z)
     GL::Vertex3d(x, y+ly,z)
-    # up
-    GL::Color(1,1,1)
+    # front
+    GL::Color(0,1,0)
+    GL::Vertex3d(x,y,z+lz)
+    GL::Vertex3d(x+lx, y,z+lz)
+    GL::Vertex3d(x+lx, y+ly,z+lz)
+    GL::Vertex3d(x, y+ly,z+lz)
+    # down
+    GL::Color(0,1,1)
     GL::Vertex3d(x,y,z)
     GL::Vertex3d(x,y,z+lz)
     GL::Vertex3d(x+lx,y,z+lz)
     GL::Vertex3d(x+lx,y,z)
-    #down
-    GL::Color(1,1 ,1)
+    #up
+    GL::Color(1,0,0)
+    GL::Vertex3d(x,y+ly,z)
+    GL::Vertex3d(x+lx,y+ly,z)
+    GL::Vertex3d(x+lx,y+ly,z+lz)
+    GL::Vertex3d(x,y+ly,z+lz)
+    #left
+    GL::Color(1,0,1)
     GL::Vertex3d(x,y,z)
+    GL::Vertex3d(x,y+ly,z)
+    GL::Vertex3d(x,y+ly,z+lz)
     GL::Vertex3d(x,y,z+lz)
-    GL::Vertex3d(x+lx,y,z+lz)
+    #right
+    GL::Color(1,1,0)
     GL::Vertex3d(x+lx,y,z)
-    
-    # TODO other faces
-    
+    GL::Vertex3d(x+lx,y+ly,z)
+    GL::Vertex3d(x+lx,y+ly,z+lz)
+    GL::Vertex3d(x+lx,y,z+lz)    
     GL::End()
     
     GL::PopMatrix()
@@ -140,6 +146,7 @@ class MechaSimView
     # Projection
     GL::MatrixMode(GL::PROJECTION)
     GL::LoadIdentity()
+    #GLU::Perspective(40.0,1.333 , 0.1, 100.0);
     #GLU::Perspective (45,1.3333,0.2,20)
     GL::Ortho(-1000,1000,-1000,1000,-1000,1000)
     

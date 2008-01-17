@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'rubygame'
 require 'view'
 require 'model'
 require 'controller'

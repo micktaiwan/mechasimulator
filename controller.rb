@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'rubygame'
 require 'joystick'
 require 'config'
 
@@ -7,21 +8,31 @@ class MechaSimController
   
   def initialize(model,view)
     @model, @view = model, view
+    @events = Rubygame::EventQueue.new()
     begin
       @joy = Joystick::Device.new CONFIG[:joy][:dev]
     rescue Exception => e
       puts "*** Can not find the joystick '#{CONFIG[:joy][:dev]}'\n    (#{e.message})\n    Please edit your configuration file config.rb"
       exit 1
     end
-    #TODO catch errors
   end
   
   def update
     process_inputs
   end
   
+  
   def process_inputs
+    
+    # rubygame events
+    @events.each { |event|
+      puts "Event: #{event}, #{event.class.name}"  if CONFIG[:log][:event]
+      @@running = nil if event.class.name == "Rubygame::QuitEvent"
+    }
+
+    # joy
     process_joy  
+    
   end
   
   def process_joy
