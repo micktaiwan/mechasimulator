@@ -24,14 +24,21 @@ class MVector
   end
   
   def rotate(a,b,c)
-    @x = @x*Math.cos(a)-@y*Math.sin(a)
-    @y = @y*Math.cos(a)-@x*Math.sin(a)
+    #@x = @x*Math.cos(a)-@y*Math.sin(a)
+    #@y = @y*Math.cos(a)-@x*Math.sin(a)
     
-    @x = @x*Math.cos(b)-@z*Math.sin(b)
-    @z = @z*Math.cos(b)-@x*Math.sin(b)
+    #@x = @x*Math.cos(a)-@z*Math.sin(a)
+    #@z = @z*Math.cos(a)-@x*Math.sin(a)
     
-    @y = @y*Math.cos(c)-@z*Math.sin(c)
-    @z = @z*Math.cos(c)-@y*Math.sin(c)
+    @y = @y*Math.cos(a)-@z*Math.sin(a)
+    @z = @z*Math.cos(a)-@y*Math.sin(a)
+  end
+  
+  ### Normalizes the vector in place.
+  def normalize!
+    mag = self.mag
+    @elements = @elements.collect {|elem| elem / mag }
+    return self
   end
   
 end
