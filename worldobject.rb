@@ -13,9 +13,9 @@ class WorldObject
     #@body.mass = mass
     #puts @body.mass
     #puts @body.force
-    @geom = ODE::Geometry::Box.new(50,50,50,@space)
+    @geom = ODE::Geometry::Box.new(2,2,2,@space)
     @geom.body = @body
-    @body.position = [0,200,0]
+    @body.position = [-1,-1,4]
     puts "initial body pos: #{@body.position}"
   end
   

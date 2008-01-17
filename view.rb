@@ -23,6 +23,9 @@ class MechaSimView
       draw_geom(geom) 
     }
     
+    draw_test
+    draw_axes
+    
     # swap buffers
     Rubygame::GL.swap_buffers()
     
@@ -36,21 +39,15 @@ class MechaSimView
     draw_box(geom)
   end
   
-  def draw_test(geom)
-    x,y,z = geom.position
-    r = geom.rotation
-    rot = [r[0], r[3], r[6], 0.0,
-    r[1], r[4], r[7], 0.0,
-    r[2], r[5], r[8], 0.0,
-    x, y, z, 1.0]
-    GL::PushMatrix()
-    #GL::MultMatrixd(rot)
-    #if body.shape=="box":
-    sx,sy,sz = geom.lengths
-    GL::Scale(sx, sy, sz)
-    GLU::SolidCube(1)
-    #end
-    GL::PopMatrix()
+  def draw_test
+    x = 100.0
+    GL::Color(1,1,1)
+    GL::Begin(GL::LINES)
+    100.times {
+      GL::Vertex3d(rand(x)-x/2,rand(x)-x/2,rand(x)-x/2)
+      GL::Vertex3d(rand(x)-x/2,rand(x)-x/2,rand(x)-x/2)
+    }
+    GL::End()
   end
   
   def draw_box(geom)
@@ -134,7 +131,6 @@ class MechaSimView
     #GL::Viewport(0,0,640,480)
     
     # Initialize
-    #GL::ClearColor(0.8,0.8,0.9,0)
     GL::ClearColor(0.0,0.0,0.0,0)
     GL::Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT);
     GL::Enable(GL::DEPTH_TEST)
@@ -147,9 +143,7 @@ class MechaSimView
     GL::MatrixMode(GL::PROJECTION)
     GL::LoadIdentity()
     GLU::Perspective(45.0,1.333 , 0.01, 5000.0);
-    #GLU::Perspective (45,1.3333,0.2,20)
     GL::Ortho(-1000,1000,-1000,1000,-1000,1000)
-    
     
     # Initialize ModelView matrix
     GL::MatrixMode(GL::MODELVIEW)
@@ -160,10 +154,27 @@ class MechaSimView
     GL::Lightfv(GL::LIGHT0,GL::DIFFUSE,[1,1,1,1])
     GL::Lightfv(GL::LIGHT0,GL::SPECULAR,[1,1,1,1])
     GL::Enable(GL::LIGHT0)
+  end
+  
+  def draw_axes
+    GL::PushMatrix()
+    GL::Begin(GL::LINES)
     
-    # View transformation
-    #GLU::LookAt (0.0,0.01,1.0, 0.0, 0.0,0.0, 0,1,0)
+    # x axis
+    GL::Color(1,0,0)
+    GL::Vertex3d(0,0,0)
+    GL::Vertex3d(1,0,0)
+    # y axis
+    GL::Color(0,1,0)
+    GL::Vertex3d(0,0,0)
+    GL::Vertex3d(0,1,0)
+    # z axis
+    GL::Color(0,0,1)
+    GL::Vertex3d(0,0,0)
+    GL::Vertex3d(0,0,1)
     
+    GL::End()
+    GL::PopMatrix()
   end
   
 end
