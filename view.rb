@@ -52,22 +52,23 @@ class MechaSimView
   end
   
   def draw_box(geom)
-    x = geom.position.x #+ 320
-    y = geom.position.y #+ 240
+    x = geom.position.x
+    y = geom.position.y
     z = geom.position.z
     lx = geom.lx
     ly = geom.ly
     lz = geom.lz
     r = geom.rotation
-    puts "#{x},#{y},#{z}, #{r.pitch.to_deg}"
+    #puts "#{x},#{y},#{z}"
+    puts "#{r.pitch.to_deg},#{r.roll.to_deg},#{r.yaw.to_deg}"
     
     GL::PushMatrix()
     # rotate
     GL::Translate(x,y,z)
     GL::Scale(lx, ly, lz)
-    GL::Rotate(r.pitch.to_deg,1,0,0)
-    GL::Rotate(r.roll.to_deg,0,1,0)
-    GL::Rotate(r.yaw.to_deg,0,0,1)
+    GL::Rotate(-r.pitch.to_deg,0,1,0)
+    GL::Rotate(r.roll.to_deg, 1,0,0)
+    GL::Rotate(r.yaw.to_deg,  0,0,1)
     lx = ly = lz = 1
     x = y = z = -0.5
     GL::Begin(GL::QUADS)
