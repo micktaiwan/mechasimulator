@@ -19,7 +19,7 @@ class MechaSimModel
     
     # ground
     #body = @world.createBody
-    geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
+    geom = ODE::Geometry::Box.new(1.0,3.0,0.1,@space)
     #geom.body = body
     geom.position = [0,0,-0.1]
     
