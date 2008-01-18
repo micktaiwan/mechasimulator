@@ -10,7 +10,7 @@ class MechaSimModel
   def initialize
     @joy1x, @joy1y, @joy2x, @joy2y = 0,0,0,0
     @world = ODE::World.new
-    #@world.gravity = [0,9.81,0]
+    @world.gravity = [0,0,-1]
     @space = ODE::Space.new
     @joints = ODE::JointGroup.new(ODE::ContactJoint,@world)
     
@@ -19,9 +19,9 @@ class MechaSimModel
     
     # ground
     #body = @world.createBody
-   # geom = ODE::Geometry::Box.new(1000,1000,1,@space)
+    geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
     #geom.body = body
-   # geom.position = [-500,-500,-1]
+    geom.position = [0,0,-0.1]
     
     @cam = Camera.new
   end
@@ -33,7 +33,7 @@ class MechaSimModel
       # apply forces
       @robot.body.addForce([@joy1x,-@joy1y,@joy2y])
     when 'camera'    
-      @cam.move(@joy1x,-@joy1y,@joy2y)
+      @cam.move(@joy1x, @joy1y, @joy2x, @joy2y)
     end
     # collision    
     @space.each { |g1|
