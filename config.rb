@@ -16,8 +16,8 @@ CONFIG = {
     :joy   => nil,
     :pos   => nil,
     :event => nil,
-    :collision => nil,
-    :camera => true
+    :collision => true,
+    :camera => nil
   }
   
 }
