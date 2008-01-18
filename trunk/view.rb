@@ -25,6 +25,7 @@ class MechaSimView
     }
     
     #draw_test
+    draw_grid
     draw_axes
     
     # swap buffers
@@ -60,17 +61,17 @@ class MechaSimView
     lz = geom.lz
     r = geom.rotation
     #puts "#{x},#{y},#{z}"
-    puts "#{r.pitch.to_deg},#{r.roll.to_deg},#{r.yaw.to_deg}"
+    #puts "#{r.pitch.to_deg},#{r.roll.to_deg},#{r.yaw.to_deg}"
     
     GL::PushMatrix()
     # rotate
-    GL::Translate(x,y,z)
-    GL::Scale(lx, ly, lz)
-    GL::Rotate(-r.pitch.to_deg,0,1,0)
-    GL::Rotate(r.roll.to_deg, 1,0,0)
+    #GL::Translate(x,y,z)
+    #GL::Scale(lx, ly, lz)
+    GL::Rotate(r.pitch.to_deg,1,0,0)
+    GL::Rotate(r.roll.to_deg, 0,1,0)
     GL::Rotate(r.yaw.to_deg,  0,0,1)
-    lx = ly = lz = 1
-    x = y = z = -0.5
+    #lx = ly = lz = 1
+    #x = y = z = -0.5
     GL::Begin(GL::QUADS)
     # front
     GL::Color(0,0,1)
@@ -187,4 +188,21 @@ class MechaSimView
     GL::PopMatrix()
   end
   
+  def draw_grid
+    GL::PushMatrix()
+    GL::Begin(GL::LINES)
+    
+    GL::Color(0.3,0.3,0.3)
+
+    x = 20
+    x.times{ |i|
+      GL::Vertex3d(i-x/2,-x/2,0)
+      GL::Vertex3d(i-x/2,x/2,0)
+      GL::Vertex3d(-x/2,i-x/2,0)
+      GL::Vertex3d(x/2,i-x/2,0)
+    }
+    
+    GL::End()
+    GL::PopMatrix()
+  end
 end

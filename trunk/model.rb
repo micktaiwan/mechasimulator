@@ -16,12 +16,17 @@ class MechaSimModel
     
     #robot
     @robot = WorldObject.new(@world,@space)
+    #@robot.body.position = [0,0,3]
+    2.times { |i|
+      o = WorldObject.new(@world,@space)
+      o.body.position = [rand(8)-4,rand(8)-4,3+i*1]
+    }
     
     # ground
     #body = @world.createBody
-    geom = ODE::Geometry::Box.new(1.0,3.0,0.1,@space)
+    #geom = ODE::Geometry::Box.new(3.0,1.0,0.1,@space)
     #geom.body = body
-    geom.position = [0,0,-0.1]
+    #geom.position = [-1.5,-0.5,-0.1]
     
     @cam = Camera.new
   end
@@ -36,18 +41,20 @@ class MechaSimModel
       @cam.move(@joy1x, @joy1y, @joy2x, @joy2y)
     end
     # collision    
+    c = []
     @space.each { |g1|
       @space.each { |g2|
         g1.collideWith(g2) { |contact|
+          puts "already: #{contact}" and next if c.include?(contact)
           puts contact.to_s if CONFIG[:log][:collision]
           contact.surface.bounce = 0.2
           contact.surface.mu = 5000
           j = @joints.createJoint(contact)
           j.attach(g1.body, g2.body)
+          c << contact
         }
       }
     }
-    
     # step
     @world.step(STEP)  
     
