@@ -3,13 +3,14 @@ class MVector
   
   attr_accessor :x,:y,:z
   
-  def initialize(x=0,y=0,z=0)
+  def initialize(x,y,z)
     @x,@y,@z = x,y,z
   end
   
   def to_s
-    "|%s|" % [@x,@y,@z].join(',')
+    "|%s|" % [@x,@y,@z].join(', ')
   end
+  
   def -(v)
     MVector.new(@x-v.x,@y-v.y,@z-v.z)
   end
@@ -19,11 +20,15 @@ class MVector
   end
   
   def *( scalar )
-    scalar = Float(scalar)
     MVector.new(@x*scalar,@y*scalar,@z*scalar)
   end
   
-  def rotate(a,b,c)
+  def /( scalar )
+    MVector.new(@x/scalar,@y/scalar,@z/scalar)
+  end
+  
+  
+  def rotate!(a,b,c)
     #@x = @x*Math.cos(a)-@y*Math.sin(a)
     #@y = @y*Math.cos(a)-@x*Math.sin(a)
     
@@ -36,9 +41,31 @@ class MVector
   
   ### Normalizes the vector in place.
   def normalize!
-    mag = self.mag
-    @elements = @elements.collect {|elem| elem / mag }
-    return self
+    @x /= length
+    @y /= length
+    @z /= length
+    self
+  end
+  
+  ### Returns the magnitude of the vector, measured in the Euclidean norm.
+  def length
+    Math.sqrt( self.sqr )
+  end
+  
+  
+  ### Returns the dot product of the vector with itself, which is also the
+  ### squared length of the vector, as measured in the Euclidean norm.
+  def sqr
+    self.dot( self )
+  end
+  
+  ### Return the dot-product
+  def dot(v)
+    scalar = 0.0
+    scalar += @x*v.x
+    scalar += @y*v.y
+    scalar += @z*v.z
+    return scalar
   end
   
 end

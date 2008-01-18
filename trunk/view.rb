@@ -1,5 +1,6 @@
 require 'model'
 require 'opengl'
+require 'util'
 
 class MechaSimView
   
@@ -13,7 +14,7 @@ class MechaSimView
     
     # camera
     GL::Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
-    GL::LoadIdentity();
+    GL::LoadIdentity()
     GLU::LookAt(@model.cam.pos.x, @model.cam.pos.y, @model.cam.pos.z,
                 @model.cam.view.x,@model.cam.view.y,@model.cam.view.z,
                 @model.cam.rot.x, @model.cam.rot.y, @model.cam.rot.z)
@@ -57,17 +58,26 @@ class MechaSimView
     lx = geom.lx
     ly = geom.ly
     lz = geom.lz
+    r = geom.rotation
+    puts "#{x},#{y},#{z}, #{r.pitch.to_deg}"
     
     GL::PushMatrix()
-    
+    # rotate
+    GL::Translate(x,y,z)
+    GL::Scale(lx, ly, lz)
+    GL::Rotate(r.pitch.to_deg,1,0,0)
+    GL::Rotate(r.roll.to_deg,0,1,0)
+    GL::Rotate(r.yaw.to_deg,0,0,1)
+    lx = ly = lz = 1
+    x = y = z = -0.5
     GL::Begin(GL::QUADS)
-    # back
+    # front
     GL::Color(0,0,1)
     GL::Vertex3d(x,y,z)
     GL::Vertex3d(x+lx, y,z)
     GL::Vertex3d(x+lx, y+ly,z)
     GL::Vertex3d(x, y+ly,z)
-    # front
+    # back
     GL::Color(0,1,0)
     GL::Vertex3d(x,y,z+lz)
     GL::Vertex3d(x+lx, y,z+lz)
@@ -127,30 +137,29 @@ class MechaSimView
     Rubygame::GL.set_attrib(Rubygame::GL::DEPTH_SIZE, 16)
     Rubygame::GL.set_attrib(Rubygame::GL::DOUBLEBUFFER, 1)
     
-    # Viewport
-    GL::Viewport(0,0,640,480)
     
     # Initialize
     GL::ClearColor(0.0,0.0,0.0,0)
-    GL::Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT);
+    GL::Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
     GL::Enable(GL::DEPTH_TEST)
     GL::Disable(GL::LIGHTING)
     #GL::Enable(GL::LIGHTING)
-    GL::Enable(GL::NORMALIZE)
-    GL::ShadeModel(GL::FLAT)
+    #GL::Enable(GL::NORMALIZE)
+    #GL::ShadeModel(GL::FLAT)
     
     # Projection
     GL::MatrixMode(GL::PROJECTION)
     GL::LoadIdentity()
-    GLU::Perspective(45.0,1.333 , 0.0001, 1000.0);
-    GL::Ortho(-100,100,-100,100,-100,100)
     
+    # Viewport
+    GL::Viewport(0,0,640,480)
+    GLU::Perspective(45.0, 1.333, 1, 100.0)
+    #GL::Ortho(-100,100,-100,100,-100,100)
     # Initialize ModelView matrix
     GL::MatrixMode(GL::MODELVIEW)
-    GL::LoadIdentity()
     
     # Light source
-    GL::Lightfv(GL::LIGHT0,GL::POSITION,[0,0,1,0])
+    GL::Lightfv(GL::LIGHT0,GL::POSITION,[0,0,6,0])
     GL::Lightfv(GL::LIGHT0,GL::DIFFUSE,[1,1,1,1])
     GL::Lightfv(GL::LIGHT0,GL::SPECULAR,[1,1,1,1])
     GL::Enable(GL::LIGHT0)
