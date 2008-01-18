@@ -19,14 +19,6 @@ class MechaSim
       @v.update
       sleep CONFIG[:sleep]
     end
-    #puts 'begin loop'
-    #view_thread  = Thread.new do @v.update end
-    #model_thread = Thread.new do @m.update end
-    #controller_thread = Thread.new do @c.process_inputs end
-    #view_thread.join
-    #model_thread.join
-    #controller_thread.join
-    #puts 'end loop'
   end
   
 end

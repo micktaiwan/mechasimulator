@@ -5,9 +5,9 @@ class Camera
   attr_accessor :pos, :view, :rot
   
   def initialize
-    @pos  = MVector.new(10.0,10.0,5.0)
-    @view = MVector.new(0.0,0.0,0.0)
-    @rot  = MVector.new(0.0,0.0,1.0)
+    @pos  = MVector.new(-5,-5,5)
+    @view = MVector.new(0,0,0)
+    @rot  = MVector.new(0,0,1)
   end
   
   
@@ -27,11 +27,13 @@ class Camera
     #v = (@view-@pos).normalize! # view vector
     #v.rotate!(x1/1000,y1/1000,0)
     #@view = @pos+v
-    
+    @pos.x += x1/100
+    @pos.y -= y1/100
+    @pos.z += x2/100
     # translate (joy2y)
-    v = (@view-@pos)#.normalize! # view vector
-    @pos  = @pos+v*(y2/100)
-    @view = @view+v*(y2/100)
+    #v = (@view-@pos)#.normalize! # view vector
+    #@pos  = @pos+v*(y2/100)
+    #@view = @view+v*(y2/100)
   end
   
 end
