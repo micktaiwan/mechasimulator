@@ -27,11 +27,11 @@ class MVector
     #@x = @x*Math.cos(a)-@y*Math.sin(a)
     #@y = @y*Math.cos(a)-@x*Math.sin(a)
     
-    #@x = @x*Math.cos(a)-@z*Math.sin(a)
-    #@z = @z*Math.cos(a)-@x*Math.sin(a)
+    @x = @x*Math.cos(-a)-@z*Math.sin(-a)
+    @z = @z*Math.cos(-a)-@x*Math.sin(-a)
     
-    @y = @y*Math.cos(a)-@z*Math.sin(a)
-    @z = @z*Math.cos(a)-@y*Math.sin(a)
+    @y = @y*Math.cos(-b)-@z*Math.sin(-b)
+    @z = @z*Math.cos(-b)-@y*Math.sin(-b)
   end
   
   ### Normalizes the vector in place.

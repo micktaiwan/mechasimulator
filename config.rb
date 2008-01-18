@@ -10,7 +10,7 @@ CONFIG = {
     :axe2y => 2 
   },
   
-  :sleep => 0.015, # sleep time
+  :sleep => 0.04, # sleep time
   
   :log => { # log config
     :joy   => nil,

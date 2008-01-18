@@ -23,7 +23,7 @@ class MechaSimView
       draw_geom(geom) 
     }
     
-    draw_test
+    #draw_test
     draw_axes
     
     # swap buffers
@@ -128,7 +128,7 @@ class MechaSimView
     Rubygame::GL.set_attrib(Rubygame::GL::DOUBLEBUFFER, 1)
     
     # Viewport
-    #GL::Viewport(0,0,640,480)
+    GL::Viewport(0,0,640,480)
     
     # Initialize
     GL::ClearColor(0.0,0.0,0.0,0)
@@ -142,8 +142,8 @@ class MechaSimView
     # Projection
     GL::MatrixMode(GL::PROJECTION)
     GL::LoadIdentity()
-    GLU::Perspective(45.0,1.333 , 0.01, 5000.0);
-    GL::Ortho(-1000,1000,-1000,1000,-1000,1000)
+    GLU::Perspective(45.0,1.333 , 0.0001, 1000.0);
+    GL::Ortho(-100,100,-100,100,-100,100)
     
     # Initialize ModelView matrix
     GL::MatrixMode(GL::MODELVIEW)
