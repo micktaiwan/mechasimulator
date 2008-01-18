@@ -8,8 +8,8 @@ class Camera
     #@pos  = MVector.new(584,263,510)
     #@view = MVector.new(769,347,686)
     
-    @pos  = MVector.new(0,0,10)
-    @view = MVector.new(0,0,0)
+    @pos  = MVector.new(0,1,10)
+    @view = MVector.new(0,0,-20)
     @rot  = MVector.new(0,1,0)
   end
   
@@ -27,8 +27,8 @@ class Camera
     
     # translate (joy2y)
     v = @view-@pos # view vector
-    @pos  = @pos+v*(z/100)
-    @view = @view+v*(z/100)
+    @pos  = @pos+v*(z/200)
+    @view = @view+v*(z/200)
   end
   
 end

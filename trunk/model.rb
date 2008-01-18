@@ -19,9 +19,9 @@ class MechaSimModel
     
     # ground
     #body = @world.createBody
-    geom = ODE::Geometry::Box.new(1000,1000,1,@space)
+   # geom = ODE::Geometry::Box.new(1000,1000,1,@space)
     #geom.body = body
-    geom.position = [-500,-500,-1]
+   # geom.position = [-500,-500,-1]
     
     @cam = Camera.new
   end
