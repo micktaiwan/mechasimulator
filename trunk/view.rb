@@ -60,6 +60,13 @@ class MechaSimView
     y = geom.position.y#-ly/2
     z = geom.position.z#-lz/2
     r = geom.rotation
+    rx = r.roll.to_deg
+    ry = -r.pitch.to_deg
+    rz = r.yaw.to_deg
+    #rx = r[0].to_deg
+    #ry = r[1].to_deg
+    #rz = r[2].to_deg
+    
     #puts "#{x},#{y},#{z}"
     #puts "#{r.pitch.to_deg},#{r.roll.to_deg},#{r.yaw.to_deg}"
     
@@ -67,9 +74,9 @@ class MechaSimView
     
     # rotate
     GL::Translate(x,y,z)
-    GL::Rotate(r.roll.to_deg,  1,0,0)
-    GL::Rotate(-r.pitch.to_deg,0,1,0)
-    GL::Rotate(r.yaw.to_deg,   0,0,1)
+    GL::Rotate(rx,  1,0,0)
+    GL::Rotate(ry,0,1,0)
+    GL::Rotate(rz,   0,0,1)
 
     # draw
     GL::Begin(GL::QUADS)

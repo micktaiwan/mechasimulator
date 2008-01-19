@@ -42,9 +42,9 @@ class MechaSimModel
     #j.attach(body,@robot.body)
     
     
-    20.times { |i|
+    40.times { |i|
       o = WorldObject.new(@world,@space)
-      o.body.position = [rand(8.0)-4,rand(8.0)-4,3+rand(2)]
+      o.body.position = [rand(16)-8,rand(16)-8,rand(16)-8]
     }
     
     # ground
