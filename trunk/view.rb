@@ -21,7 +21,7 @@ class MechaSimView
     
     # draw geometries
     @model.space.each { |geom|
-      draw_geom(geom) 
+      draw_geom(geom)
     }
     
     #draw_test
@@ -53,84 +53,69 @@ class MechaSimView
   end
   
   def draw_box(geom)
-    lx = geom.lx
-    ly = geom.ly
-    lz = geom.lz
-    x = geom.position.x-lx/2
-    y = geom.position.y-ly/2
-    z = geom.position.z-lz/2
+    @lx = geom.lx
+    @ly = geom.ly
+    @lz = geom.lz
+    x = geom.position.x#-lx/2
+    y = geom.position.y#-ly/2
+    z = geom.position.z#-lz/2
     r = geom.rotation
     #puts "#{x},#{y},#{z}"
     #puts "#{r.pitch.to_deg},#{r.roll.to_deg},#{r.yaw.to_deg}"
-    #sleep(0.5)
     
     GL::PushMatrix()
+    
     # rotate
-    #rm = r.to_matrix
-    
-    #m = [rm[0,0],rm[1,0],rm[2,0],0,
-    #     rm[0,1],rm[1,1],rm[2,1],0,
-    #     rm[0,2],rm[1,2],rm[2,2],0,
-    #     x,      y,      z,      1]
-    
-    #puts m.join(', ')
-    #sleep(2)
-    
-    #GL::MultMatrix(m)
-    
-    #GL::Translate(-x,-y,-z)
-    #GL::Scale(lx, ly, lz)
-    #GL::Rotate(r.roll.to_deg,  1,0,0)
-    #GL::Rotate(-r.pitch.to_deg,0,1,0)
-    #GL::Rotate(r.yaw.to_deg,   0,0,1)
-    #GL::Translate(-(x+lx/2),-(y+ly/2),-(z+lz/2))
-    GL::Rotate(@model.joy1x,  1,0,0)
-    GL::Rotate(@model.joy1y,  0,1,0)
-    GL::Rotate(@model.joy2y,  0,0,1)
-    #GL::Translate(x+lx/2,y+ly/2,z+lz/2)
+    GL::Translate(x,y,z)
+    GL::Rotate(r.roll.to_deg,  1,0,0)
+    GL::Rotate(-r.pitch.to_deg,0,1,0)
+    GL::Rotate(r.yaw.to_deg,   0,0,1)
 
-    #lx = ly = lz = 1
-    #x = y = z = -0.5
+    # draw
     GL::Begin(GL::QUADS)
-    # front
+    # bottom
     GL::Color(0,0,1)
-    GL::Vertex3d(x,y,z)
-    GL::Vertex3d(x+lx, y,z)
-    GL::Vertex3d(x+lx, y+ly,z)
-    GL::Vertex3d(x, y+ly,z)
-    # back
+    v(0,0,0)
+    v(@lx, 0,0)
+    v(@lx, @ly,0)
+    v(0, @ly,0)
+    # up
     GL::Color(0,1,0)
-    GL::Vertex3d(x,y,z+lz)
-    GL::Vertex3d(x+lx, y,z+lz)
-    GL::Vertex3d(x+lx, y+ly,z+lz)
-    GL::Vertex3d(x, y+ly,z+lz)
-    # down
+    v(0,0,@lz)
+    v(@lx, 0,@lz)
+    v(@lx, @ly,@lz)
+    v(0, @ly,@lz)
+    # back
     GL::Color(0,1,1)
-    GL::Vertex3d(x,y,z)
-    GL::Vertex3d(x,y,z+lz)
-    GL::Vertex3d(x+lx,y,z+lz)
-    GL::Vertex3d(x+lx,y,z)
-    #up
+    v(0,0,0)
+    v(0,0,@lz)
+    v(@lx,0,@lz)
+    v(@lx,0,0)
+    #front
     GL::Color(1,0,0)
-    GL::Vertex3d(x,y+ly,z)
-    GL::Vertex3d(x+lx,y+ly,z)
-    GL::Vertex3d(x+lx,y+ly,z+lz)
-    GL::Vertex3d(x,y+ly,z+lz)
+    v(0,@ly,0)
+    v(@lx,@ly,0)
+    v(@lx,@ly,@lz)
+    v(0,@ly,@lz)
     #left
     GL::Color(1,0,1)
-    GL::Vertex3d(x,y,z)
-    GL::Vertex3d(x,y+ly,z)
-    GL::Vertex3d(x,y+ly,z+lz)
-    GL::Vertex3d(x,y,z+lz)
+    v(0,0,0)
+    v(0,@ly,0)
+    v(0,@ly,@lz)
+    v(0,0,@lz)
     #right
     GL::Color(1,1,0)
-    GL::Vertex3d(x+lx,y,z)
-    GL::Vertex3d(x+lx,y+ly,z)
-    GL::Vertex3d(x+lx,y+ly,z+lz)
-    GL::Vertex3d(x+lx,y,z+lz)    
+    v(@lx,0,0)
+    v(@lx,@ly,0)
+    v(@lx,@ly,@lz)
+    v(@lx,0,@lz)    
     GL::End()
     
     GL::PopMatrix()
+  end
+  
+  def v(x,y,z)
+    GL::Vertex3d(x-@lx/2,y-@ly/2,z-@lz/2)
   end
   
   def draw_simple_box(x,y,w)
