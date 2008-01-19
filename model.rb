@@ -19,12 +19,14 @@ class MechaSimModel
     
     #robot
     @robot = WorldObject.new(@world,@space)
-    @robot.body.position = [0,0,0]
+    @robot.body.position = [0,0,2]
+    
     # second body for joint test
-    body = @world.createBody
-    body.position = [0,0,0]
-    geom = ODE::Geometry::Box.new(3,1,1,@space)
-    geom.body = body
+    
+    #body = @world.createBody
+    #body.position = [0,0,0]
+    #geom = ODE::Geometry::Box.new(3,1,1,@space)
+    #geom.body = body
     
     #body = @world.createBody
     #body.position = [0,0,10]
@@ -40,16 +42,16 @@ class MechaSimModel
     #j.attach(body,@robot.body)
     
     
-    #20.times { |i|
-    #  o = WorldObject.new(@world,@space)
-    #  o.body.position = [rand(8.0)-4,rand(8.0)-4,3+rand(2)]
-    #}
+    20.times { |i|
+      o = WorldObject.new(@world,@space)
+      o.body.position = [rand(8.0)-4,rand(8.0)-4,3+rand(2)]
+    }
     
     # ground
     #body = @world.createBody
-    # geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
+    geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
     #geom.body = body
-    # geom.position = [0,0,-0.1]
+    geom.position = [0,0,-0.1]
     
     @cam = Camera.new
   end
@@ -59,14 +61,14 @@ class MechaSimModel
     case CONFIG[:joy][:control]
     when 'robot'
       # apply forces
-      #@robot.body.addForce([@joy1x/10,-@joy1y/10,-@joy2y/10])
+      @robot.body.addForce([@joy1x/10,-@joy1y/10,-@joy2y/10])
     when 'camera'    
       @cam.move(@joy1x, @joy1y, @joy2x, @joy2y)
     end
     # collision    
     c = []
     @space.each { |g1|
-      break
+      #break
       @space.each { |g2|
         g1.collideWith(g2) { |contact|
           puts "already: #{contact}" and next if c.include?(contact)
