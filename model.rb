@@ -13,18 +13,25 @@ class MechaSimModel
     #@world.gravity = [0,0,-1]
     @world.erp = 0.8
     @world.cfm = 0.00001
-
+    
     @space = ODE::Space.new
     @joints = ODE::JointGroup.new(ODE::ContactJoint,@world)
     
     #robot
     @robot = WorldObject.new(@world,@space)
-    @robot.body.position = [0,0,2]
+    @robot.body.position = [0,0,0]
     # second body for joint test
     body = @world.createBody
     body.position = [0,0,0]
     geom = ODE::Geometry::Box.new(3,1,1,@space)
     geom.body = body
+    
+    #body = @world.createBody
+    #body.position = [0,0,10]
+    #geom = ODE::Geometry::Box.new(1,1,1,@space)
+    #geom.body = body
+    
+    
     #body.rotation = [0,0,45.to_rad,45.to_rad]
     #@robot_joints = ODE::JointGroup.new(ODE::HingeJoint,@world)
     #j = ODE::HingeJoint.new(@world,@robot_joints)
@@ -40,9 +47,9 @@ class MechaSimModel
     
     # ground
     #body = @world.createBody
-   # geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
+    # geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
     #geom.body = body
-   # geom.position = [0,0,-0.1]
+    # geom.position = [0,0,-0.1]
     
     @cam = Camera.new
   end
@@ -59,7 +66,7 @@ class MechaSimModel
     # collision    
     c = []
     @space.each { |g1|
-      #break
+      break
       @space.each { |g2|
         g1.collideWith(g2) { |contact|
           puts "already: #{contact}" and next if c.include?(contact)
