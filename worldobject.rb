@@ -16,7 +16,6 @@ class WorldObject
     #puts @body.force
     @geom = ODE::Geometry::Box.new(1,1,1,@space)
     @geom.body = @body
-    puts @geom.position
   end
   
 end
