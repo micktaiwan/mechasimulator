@@ -60,7 +60,7 @@ class MechaSimView
     y = geom.position.y-ly/2
     z = geom.position.z-lz/2
     r = geom.rotation
-    puts "#{x},#{y},#{z}"
+    #puts "#{x},#{y},#{z}"
     #puts "#{r.pitch.to_deg},#{r.roll.to_deg},#{r.yaw.to_deg}"
     #sleep(0.5)
     
@@ -83,11 +83,11 @@ class MechaSimView
     #GL::Rotate(r.roll.to_deg,  1,0,0)
     #GL::Rotate(-r.pitch.to_deg,0,1,0)
     #GL::Rotate(r.yaw.to_deg,   0,0,1)
-    GL::Translate(-(x+lx/2),-(y+ly/2),-(z+lz/2))
+    #GL::Translate(-(x+lx/2),-(y+ly/2),-(z+lz/2))
     GL::Rotate(@model.joy1x,  1,0,0)
     GL::Rotate(@model.joy1y,  0,1,0)
     GL::Rotate(@model.joy2y,  0,0,1)
-    GL::Translate(x+lx/2,y+ly/2,z+lz/2)
+    #GL::Translate(x+lx/2,y+ly/2,z+lz/2)
 
     #lx = ly = lz = 1
     #x = y = z = -0.5
