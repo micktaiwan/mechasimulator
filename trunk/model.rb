@@ -10,7 +10,7 @@ class MechaSimModel
   def initialize
     @joy1x, @joy1y, @joy2x, @joy2y = 0,0,0,0
     @world = ODE::World.new
-    @world.gravity = [0,0,-1]
+    #@world.gravity = [0,0,-1]
     @world.erp = 0.8
     @world.cfm = 0.00001
 
@@ -19,7 +19,20 @@ class MechaSimModel
     
     #robot
     @robot = WorldObject.new(@world,@space)
-    #@robot.body.position = [0,0,3]
+    @robot.body.position = [0,0,2]
+    # second body for joint test
+    body = @world.createBody
+    body.position = [0,0,0]
+    geom = ODE::Geometry::Box.new(3,1,1,@space)
+    geom.body = body
+    #body.rotation = [0,0,45.to_rad,45.to_rad]
+    #@robot_joints = ODE::JointGroup.new(ODE::HingeJoint,@world)
+    #j = ODE::HingeJoint.new(@world,@robot_joints)
+    #j.anchor = [0,0,1]
+    #j.axis   = [0,1,0]
+    #j.attach(body,@robot.body)
+    
+    
     #20.times { |i|
     #  o = WorldObject.new(@world,@space)
     #  o.body.position = [rand(8.0)-4,rand(8.0)-4,3+rand(2)]
@@ -27,9 +40,9 @@ class MechaSimModel
     
     # ground
     #body = @world.createBody
-    geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
+   # geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
     #geom.body = body
-    geom.position = [0,0,-0.1]
+   # geom.position = [0,0,-0.1]
     
     @cam = Camera.new
   end
@@ -39,7 +52,7 @@ class MechaSimModel
     case CONFIG[:joy][:control]
     when 'robot'
       # apply forces
-      @robot.body.addForce([@joy1x,-@joy1y,@joy2y])
+      #@robot.body.addForce([@joy1x/10,-@joy1y/10,-@joy2y/10])
     when 'camera'    
       @cam.move(@joy1x, @joy1y, @joy2x, @joy2y)
     end
