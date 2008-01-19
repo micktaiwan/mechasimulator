@@ -60,21 +60,35 @@ class MechaSimView
     y = geom.position.y-ly/2
     z = geom.position.z-lz/2
     r = geom.rotation
-    #puts "#{x},#{y},#{z}"
+    puts "#{x},#{y},#{z}"
     #puts "#{r.pitch.to_deg},#{r.roll.to_deg},#{r.yaw.to_deg}"
+    #sleep(0.5)
     
     GL::PushMatrix()
     # rotate
-    #m = [1,1,1,1,
-    #1,1,1,1,
-    #1,1,1,1]
+    #rm = r.to_matrix
+    
+    #m = [rm[0,0],rm[1,0],rm[2,0],0,
+    #     rm[0,1],rm[1,1],rm[2,1],0,
+    #     rm[0,2],rm[1,2],rm[2,2],0,
+    #     x,      y,      z,      1]
+    
+    #puts m.join(', ')
+    #sleep(2)
+    
     #GL::MultMatrix(m)
-
+    
     #GL::Translate(-x,-y,-z)
     #GL::Scale(lx, ly, lz)
+    #GL::Rotate(r.roll.to_deg,  1,0,0)
     #GL::Rotate(-r.pitch.to_deg,0,1,0)
-    #GL::Rotate(r.roll.to_deg, 1,0,0)
-    #GL::Rotate(r.yaw.to_deg,  0,0,1)
+    #GL::Rotate(r.yaw.to_deg,   0,0,1)
+    GL::Translate(-(x+lx/2),-(y+ly/2),-(z+lz/2))
+    GL::Rotate(@model.joy1x,  1,0,0)
+    GL::Rotate(@model.joy1y,  0,1,0)
+    GL::Rotate(@model.joy2y,  0,0,1)
+    GL::Translate(x+lx/2,y+ly/2,z+lz/2)
+
     #lx = ly = lz = 1
     #x = y = z = -0.5
     GL::Begin(GL::QUADS)
@@ -198,7 +212,7 @@ class MechaSimView
     GL::Begin(GL::LINES)
     
     GL::Color(0.3,0.3,0.3)
-
+    
     x = 20
     x.times{ |i|
       GL::Vertex3d(i-x/2,-x/2,0)
