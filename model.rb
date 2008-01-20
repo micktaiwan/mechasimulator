@@ -10,7 +10,7 @@ class MechaSimModel
   def initialize
     @joy1x, @joy1y, @joy2x, @joy2y = 0,0,0,0
     @world = ODE::World.new
-    #@world.gravity = [0,0,-1]
+    @world.gravity = [0,0,-10]
     @world.erp = 0.8
     @world.cfm = 0.00001
     
@@ -42,26 +42,27 @@ class MechaSimModel
     #j.attach(body,@robot.body)
     
     
-    40.times { |i|
-      o = WorldObject.new(@world,@space)
-      o.body.position = [rand(16)-8,rand(16)-8,rand(16)-8]
-    }
+    #40.times { |i|
+    #  o = ODE::Geometry::Box.new(1,1,1,@space)
+    #  o.position = [rand(16)-8,rand(16)-8,rand(16)-8]
+    #}
     
     # ground
     #body = @world.createBody
-    geom = ODE::Geometry::Box.new(1.0,1.0,0.1,@space)
+    geom = ODE::Geometry::Box.new(10.0,10.0,0.1,@space)
     #geom.body = body
     geom.position = [0,0,-0.1]
+    #geom.rotation = [45,0,0,0]
     
     @cam = Camera.new
   end
   
   def update
     
+    # apply forces
     case CONFIG[:joy][:control]
     when 'robot'
-      # apply forces
-      @robot.body.addForce([@joy1x/10,-@joy1y/10,-@joy2y/10])
+      @robot.body.addForce([@joy1x,-@joy1y,-@joy2y])
     when 'camera'    
       @cam.move(@joy1x, @joy1y, @joy2x, @joy2y)
     end
