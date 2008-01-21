@@ -1,4 +1,4 @@
-require 'ode'
+#require 'ode'
 
 class WorldObject
   

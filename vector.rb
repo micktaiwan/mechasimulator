@@ -1,4 +1,3 @@
-
 class MVector
   
   attr_accessor :x,:y,:z

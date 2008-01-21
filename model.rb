@@ -1,6 +1,7 @@
+require 'ode'
 require 'worldobject'
 require 'camera'
-STEP = 0.05
+STEP = 0.005
 
 class MechaSimModel
   
@@ -11,8 +12,8 @@ class MechaSimModel
     @joy1x, @joy1y, @joy2x, @joy2y = 0,0,0,0
     @world = ODE::World.new
     @world.gravity = [0,0,-10]
-    @world.erp = 0.8
-    @world.cfm = 0.00001
+    #@world.erp = 0.8
+    #@world.cfm = 0.00001
     
     @space = ODE::Space.new
     @joints = ODE::JointGroup.new(ODE::ContactJoint,@world)
@@ -49,7 +50,7 @@ class MechaSimModel
     
     # ground
     #body = @world.createBody
-    geom = ODE::Geometry::Box.new(10.0,10.0,0.1,@space)
+    geom = ODE::Geometry::Box.new(20.0,20.0,0.1,@space)
     #geom.body = body
     geom.position = [0,0,-0.1]
     #geom.rotation = [45,0,0,0]

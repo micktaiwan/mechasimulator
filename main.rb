@@ -1,4 +1,4 @@
-require 'rubygems'
+#require 'rubygems'
 require 'rubygame'
 require 'view'
 require 'model'

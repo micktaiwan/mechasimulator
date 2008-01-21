@@ -1,6 +1,6 @@
-require 'rubygems'
+#require 'rubygems'
 require 'rubygame'
-require 'joystick'
+#require 'joystick'
 require 'config'
 
 # takes inputs and update view and model
