@@ -50,9 +50,9 @@ class MechaSimModel
     
     # ground
     #body = @world.createBody
-    geom = ODE::Geometry::Box.new(20.0,20.0,0.1,@space)
+    geom = ODE::Box.new(20.0,20.0,0.1,@space)
     #geom.body = body
-    geom.position = [0,0,-0.1]
+    geom.position = ODE::Position.new([0,0,-0.1])
     #geom.rotation = [45,0,0,0]
     
     @cam = Camera.new
@@ -69,20 +69,20 @@ class MechaSimModel
     end
     # collision    
     c = []
-    @space.each { |g1|
-      #break
-      @space.each { |g2|
-        g1.collideWith(g2) { |contact|
-          puts "already: #{contact}" and next if c.include?(contact)
-          puts contact.to_s if CONFIG[:log][:collision]
-          contact.surface.bounce = 0.2
-          contact.surface.mu = 5000
-          j = @joints.createJoint(contact)
-          j.attach(g1.body, g2.body)
-          c << contact
-        }
-      }
-    }
+#    @space.each { |g1|
+#      #break
+#      @space.each { |g2|
+#        g1.collideWith(g2) { |contact|
+#          puts "already: #{contact}" and next if c.include?(contact)
+#          puts contact.to_s if CONFIG[:log][:collision]
+#          contact.surface.bounce = 0.2
+#          contact.surface.mu = 5000
+#          j = @joints.createJoint(contact)
+#          j.attach(g1.body, g2.body)
+#          c << contact
+#        }
+#      }
+#    }
     # step
     @world.step(STEP)  
     
