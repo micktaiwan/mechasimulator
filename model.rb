@@ -11,7 +11,7 @@ class MechaSimModel
   def initialize
     @joy1x, @joy1y, @joy2x, @joy2y = 0,0,0,0
     @world = ODE::World.new
-    @world.gravity = [0,0,-10]
+    #@world.gravity = [0,0,-10]
     #@world.erp = 0.8
     #@world.cfm = 0.00001
     
@@ -19,8 +19,8 @@ class MechaSimModel
     @joints = ODE::JointGroup.new(ODE::ContactJoint,@world)
     
     #robot
-    @robot = WorldObject.new(@world,@space)
-    @robot.body.position = [0,0,2]
+    @robot = ODE::Box.new(1,1,1,@space)
+#    @robot.body.position = [0,0,2]
     
     # second body for joint test
     
@@ -63,7 +63,7 @@ class MechaSimModel
     # apply forces
     case CONFIG[:joy][:control]
     when 'robot'
-      @robot.body.addForce([@joy1x,-@joy1y,-@joy2y])
+      @robot.add_force([@joy1x,-@joy1y,-@joy2y])
     when 'camera'    
       @cam.move(@joy1x, @joy1y, @joy2x, @joy2y)
     end
