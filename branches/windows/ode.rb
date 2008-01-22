@@ -22,12 +22,17 @@ module ODE
     def initialize
       @position = Position.new
       @rotation = Position.new
+      @forces = []
+    end
+    
+    def add_force(f)
+      @forces << f
     end
     
   end
   
   class Box < Geometry
-    attr_accessor :body, :position, :rotation, :lx, :ly, :lz
+    attr_accessor :position, :rotation, :lx, :ly, :lz
     def initialize(lx,ly,lz,space)
       super()
       @lx, @ly, @lz = lx,ly,lz
@@ -36,28 +41,38 @@ module ODE
   end
   
   
-  class Body
-    
-    attr_accessor :position
-    
-    def addForce(f)
-      puts 'addForce'
-    end
-    
-    
-  end
+  #  class Body
+  #    
+  #    attr_accessor :geom
+  #    
+  #    def addForce(f)
+  #      puts 'addForce'
+  #      
+  #      
+  #    end
+  #    
+  #    def position
+  #      @geom.position
+  #    end
+  #    
+  #    def position=(p)
+  #      @geom.position = p
+  #    end
+  #    
+  #  end
   
   class World
     
     attr_accessor :gravity
     
-    def createBody
-      Body.new
-    end
+#    def createBody
+#      Body.new
+#    end
     
     def step(s)
       puts 'step'
     end
+    
   end
   
   class Space
