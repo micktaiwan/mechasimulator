@@ -15,7 +15,7 @@ class MechaSimModel
     #@world.erp = 0.8
     #@world.cfm = 0.00001
     
-    @space = ODE::Space.new
+    @space = @world.add_space
     @joints = ODE::JointGroup.new(ODE::ContactJoint,@world)
     
     #robot
@@ -52,7 +52,7 @@ class MechaSimModel
     #body = @world.createBody
     geom = ODE::Box.new(20.0,20.0,0.1,@space)
     #geom.body = body
-    geom.position = ODE::Position.new([0,0,-0.1])
+    geom.position = [0,0,-0.1]
     #geom.rotation = [45,0,0,0]
     
     @cam = Camera.new
@@ -68,7 +68,7 @@ class MechaSimModel
       @cam.move(@joy1x, @joy1y, @joy2x, @joy2y)
     end
     # collision    
-    c = []
+#    c = []
 #    @space.each { |g1|
 #      #break
 #      @space.each { |g2|
