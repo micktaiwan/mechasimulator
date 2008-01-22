@@ -11,7 +11,7 @@ class MechaSimView
   end
   
   def update
-    
+    #puts 'update'
     # camera
     GL::Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
     GL::LoadIdentity()
@@ -21,6 +21,7 @@ class MechaSimView
     
     # draw geometries
     @model.space.each { |geom|
+      puts "geom: #{geom}"
       draw_geom(geom)
     }
     
@@ -41,47 +42,55 @@ class MechaSimView
     draw_box(geom)
   end
   
-  def draw_test
-    x = 100.0
-    GL::Color(1,1,1)
-    GL::Begin(GL::LINES)
-    100.times {
-      GL::Vertex3d(rand(x)-x/2,rand(x)-x/2,rand(x)-x/2)
-      GL::Vertex3d(rand(x)-x/2,rand(x)-x/2,rand(x)-x/2)
-    }
-    GL::End()
-  end
   
-  def p(r)
-    x = r[0]; y = r[1]; z = r[2]; w = r[3]
-    # sin(pitch) = -2(xz - wy) 
-    puts Math.sin(x*z)
-    return Math::asin( -2 * (x*z - w*y) )
-  end
+  #  def draw_test
+  #    x = 100.0
+  #    GL::Color(1,1,1)
+  #    GL::Begin(GL::LINES)
+  #    100.times {
+  #      GL::Vertex3d(rand(x)-x/2,rand(x)-x/2,rand(x)-x/2)
+  #      GL::Vertex3d(rand(x)-x/2,rand(x)-x/2,rand(x)-x/2)
+  #    }
+  #    GL::End()
+  #  end
+  #  
+  #  def p(r)
+  #    x = r[0]; y = r[1]; z = r[2]; w = r[3]
+  #    # sin(pitch) = -2(xz - wy) 
+  #    puts Math.sin(x*z)
+  #    return Math::asin( -2 * (x*z - w*y) )
+  #  end
+  
+  
+  #  def define(r)
+  #    x = r[0]; y = r[1]; z = r[2]; w = r[3]
+  #    sqw = w*w
+  #    sqx = x*x
+  #    sqy = y*y
+  #    sqz = z*z
+  #    unit = sqx + sqy + sqz + sqw # if normalised is one, otherwise is correction factor
+  #    test = x*y + z*w
+  #    if (test > 0.499*unit) # singularity at north pole
+  #      @heading = 2 * Math.atan2(x,w)
+  #      @attitude = Math::PI/2
+  #      @bank = 0
+  #      return
+  #    end
+  #    if (test < -0.499*unit) # singularity at south pole
+  #      @heading = -2 * Math.atan2(x,w)
+  #      @attitude = -Math::PI/2
+  #      @bank = 0
+  #      return
+  #    end
+  #    @heading = Math.atan2(2*y*w-2*x*z , sqx - sqy - sqz + sqw)
+  #    @attitude = Math.asin(2*test/unit)
+  #    @bank = Math.atan2(2*x*w-2*y*z , -sqx + sqy - sqz + sqw)
+  #  end
   
   def define(r)
-    x = r[0]; y = r[1]; z = r[2]; w = r[3]
-    sqw = w*w
-    sqx = x*x
-    sqy = y*y
-    sqz = z*z
-    unit = sqx + sqy + sqz + sqw # if normalised is one, otherwise is correction factor
-    test = x*y + z*w
-    if (test > 0.499*unit) # singularity at north pole
-      @heading = 2 * Math.atan2(x,w)
-      @attitude = Math::PI/2
-      @bank = 0
-      return
-    end
-    if (test < -0.499*unit) # singularity at south pole
-      @heading = -2 * Math.atan2(x,w)
-      @attitude = -Math::PI/2
-      @bank = 0
-      return
-    end
-    @heading = Math.atan2(2*y*w-2*x*z , sqx - sqy - sqz + sqw)
-    @attitude = Math.asin(2*test/unit)
-    @bank = Math.atan2(2*x*w-2*y*z , -sqx + sqy - sqz + sqw)
+    @heading = 0  
+    @attitude = 0  
+    @bank = 0  
   end
   
   def draw_box(geom)
@@ -179,11 +188,9 @@ class MechaSimView
   end
   
   def screen_make(wide, high, fullscreen = false, doublebuf = true) 
-    #flags  = Rubygame::HWSURFACE | Rubygame::ANYFORMAT | Rubygame::OPENGL
-    #flags |= Rubygame::FULLSCREEN if fullscreen
-    #flags |= Rubygame::DOUBLEBUF  if doublebuf
-    flags = Rubygame::OPENGL
-    #puts flags
+    flags = [Rubygame::HWSURFACE, Rubygame::ANYFORMAT, Rubygame::OPENGL]
+    flags << Rubygame::FULLSCREEN if fullscreen
+    flags << Rubygame::DOUBLEBUF  if doublebuf
     screen = Rubygame::Screen.set_mode([wide, high], 16, flags )
     #screen.title = 'Robot Simulator'
     screen
@@ -195,7 +202,6 @@ class MechaSimView
     Rubygame::GL.set_attrib(Rubygame::GL::BLUE_SIZE, 5)
     Rubygame::GL.set_attrib(Rubygame::GL::DEPTH_SIZE, 16)
     Rubygame::GL.set_attrib(Rubygame::GL::DOUBLEBUFFER, 1)
-    
     
     # Initialize
     GL::ClearColor(0.0,0.0,0.0,0)
