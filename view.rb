@@ -178,14 +178,14 @@ class MechaSimView
     GL::Vertex3d(x-@lx/2,y-@ly/2,z-@lz/2)
   end
   
-  def draw_simple_box(x,y,w)
-    GL::Begin(GL::QUADS)
-    GL::Vertex(x, w)
-    GL::Vertex(x, y+w)
-    GL::Vertex(x+w, y+w)
-    GL::Vertex(x+w, y)
-    GL::End()
-  end
+#  def draw_simple_box(x,y,w)
+#    GL::Begin(GL::QUADS)
+#    GL::Vertex(x, w)
+#    GL::Vertex(x, y+w)
+#    GL::Vertex(x+w, y+w)
+#    GL::Vertex(x+w, y)
+#    GL::End()
+#  end
   
   def screen_make(wide, high, fullscreen = false, doublebuf = true) 
     flags = [Rubygame::HWSURFACE, Rubygame::ANYFORMAT, Rubygame::OPENGL]
