@@ -4,10 +4,14 @@ class MVector
   
   def initialize(x=0,y=0,z=0)
     if x.class.to_s == "Array"
-      @x,@y,@z = x[0],x[1],x[2]
+      from_a(x)
     else
       @x,@y,@z = x,y,z
     end
+  end
+  
+  def from_a(arr)
+    @x, @y, @z = arr[0],arr[1],arr[2]
   end
   
   def to_s

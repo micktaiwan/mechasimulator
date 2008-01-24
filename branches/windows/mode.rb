@@ -1,3 +1,5 @@
+# mode: Mick ODE.....
+
 class Array
   
   def x; self[0]; end
@@ -6,24 +8,7 @@ class Array
   
 end
 
-
 module ODE
-  
-  #  class Position
-  #    
-  #    def initialize(a=nil)
-  #      @p = a and return if a
-  #      @p = [0,0,0]
-  #    end
-  #    
-  #    def x; @p[0]; end
-  #    def x=(i); @p[0]=i; end
-  #    def y; @p[1]; end
-  #    def y=(i); @p[1]=i; end
-  #    def z; @p[2]; end
-  #    def z=(i); @p[2]=i; end
-  #    
-  #  end
   
   class Geometry
     
@@ -34,7 +19,7 @@ module ODE
     end
     
     def position=(arr)
-      @position.x, @position.y, @position.z = arr[0],arr[1],arr[2]
+      @position.from_a(arr)
     end
     
     def add_force(f)
@@ -101,7 +86,7 @@ module ODE
     #    end
     
     def step(st)
-      #puts 'step'
+      puts 'step' if CONFIG[:log][:debug]
       @spaces.each {|s| s.step(st)}
     end
     

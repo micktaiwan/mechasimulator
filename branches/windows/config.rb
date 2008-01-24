@@ -15,9 +15,10 @@ CONFIG = {
   :log => { # log config
     :joy   => nil,
     :pos   => nil,
-    :event => true,
-    :collision => true,
-    :camera => nil
+    :event => nil,
+    :collision => nil,
+    :camera => nil,
+    :debug => nil
   }
   
 }

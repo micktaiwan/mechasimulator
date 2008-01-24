@@ -1,3 +1,6 @@
+# TODO: chargement du monde
+# TODO: joints
+
 require 'rubygems'
 require 'rubygame'
 require 'view'

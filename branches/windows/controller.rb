@@ -34,18 +34,11 @@ class MechaSimController
         
         when Rubygame::KeyDownEvent
         @@running = nil if event.key == Rubygame::K_ESCAPE
-
-        #Indicates that the mouse cursor moved.
-        #This event has these attributes:
-        #pos:  the new position of the cursor, in the form [x,y].
-        #rel:  the relative movement of the cursor since the last update, [x,y].
-        #buttons:  the mouse buttons that were being held during the movement, an Array of zero or more of these constants in module Rubygame (or the corresponding button number):
-        #MOUSE_LEFT: 1; left mouse button
-        #MOUSE_MIDDLE: 2; middle mouse button
-        #MOUSE_RIGHT:  3; right mouse button
-      when Rubygame::MouseMotionEvent
-        puts "Pos: #{event.pos.join(',')}, relative: #{event.rel.join(',')}, bouttons: #{event.buttons}"
+        
+        when Rubygame::MouseMotionEvent
+        puts "Mouse Pos: #{event.pos.join(',')}, relative: #{event.rel.join(',')}, bouttons: #{event.buttons}" if CONFIG[:log][:debug]
         @model.cam.pos.x = event.pos.x/10
+        @model.cam.pos.y = event.pos.y/10
       end
     }
     
