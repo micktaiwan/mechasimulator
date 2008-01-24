@@ -3,7 +3,11 @@ class MVector
   attr_accessor :x,:y,:z
   
   def initialize(x=0,y=0,z=0)
-    @x,@y,@z = x,y,z
+    if x.class.to_s == "Array"
+      @x,@y,@z = x[0],x[1],x[2]
+    else
+      @x,@y,@z = x,y,z
+    end
   end
   
   def to_s
@@ -15,7 +19,6 @@ class MVector
   end
   
   def +(v)
-    puts "v=#{v}"
     MVector.new(@x+v.x,@y+v.y,@z+v.z)
   end
   

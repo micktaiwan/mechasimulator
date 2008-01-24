@@ -20,8 +20,8 @@ class MechaSimView
                 @model.cam.rot.x, @model.cam.rot.y, @model.cam.rot.z)
     
     # draw geometries
-    @model.space.each { |geom|
-      puts "geom: #{geom}"
+    @model.space.each_geom { |geom|
+      #puts "geom: #{geom}"
       draw_geom(geom)
     }
     

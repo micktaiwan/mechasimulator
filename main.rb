@@ -10,8 +10,8 @@ class MechaSim
     @m = MechaSimModel.new
     @v = MechaSimView.new(@m)
     @c = MechaSimController.new(@m,@v)
-    #@clock = Rubygame::Clock.new
-    #@clock.target_framerate= 40
+    @clock = Rubygame::Clock.new
+    @clock.target_framerate= 30
   end
   
   def loop
@@ -19,8 +19,8 @@ class MechaSim
       @c.update
       @m.update
       @v.update
-      sleep CONFIG[:sleep]
-      #@clock.tick
+      #sleep CONFIG[:sleep]
+      @clock.tick
     end
   end
   
