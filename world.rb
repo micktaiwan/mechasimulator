@@ -5,8 +5,9 @@ module World
     print 'Chargement du monde... '
     
     # un cube
-    geom = ODE::Box.new(1,1,1,@space) # n'oubliez pas @space, je changerai ca plus tard
-    geom.position = [2,2,0]
+    cube = ODE::Box.new(25,2,0.2,@space) # n'oubliez pas @space, je changerai ca plus tard
+    cube.position = [2,2,0]
+    cube.rotation = [45,45,45] # les rotations sont dependantes aujourd'hui... d'abord x ensuite y ensuite z
     
     # ... et c'est tout ce qu'on peut faire aujourd'hui
     puts 'fini'

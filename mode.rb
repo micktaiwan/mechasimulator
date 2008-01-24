@@ -44,6 +44,70 @@ module ODE
       @lx, @ly, @lz = lx,ly,lz
       space.add_geom(self) if space
     end
+    
+    def draw
+      x = position.x#-lx/2
+      y = position.y#-ly/2
+      z = position.z#-lz/2
+      
+      GL::PushMatrix()
+      
+      # rotate
+      GL::Translate(x,y,z)
+      
+      # TODO: rotations are dependant...
+      GL::Rotate(rotation.y,  1, 0, 0)
+      GL::Rotate(rotation.x,  0,-1, 0)
+      GL::Rotate(rotation.z,  0, 0, 1)
+      
+      # draw
+      GL::Begin(GL::QUADS)
+      
+      # bottom
+      GL::Color(0,0,1)
+      v(0,0,0)
+      v(@lx, 0,0)
+      v(@lx, @ly,0)
+      v(0, @ly,0)
+      # up
+      GL::Color(0,1,0)
+      v(0,0,@lz)
+      v(@lx, 0,@lz)
+      v(@lx, @ly,@lz)
+      v(0, @ly,@lz)
+      # back
+      GL::Color(0,1,1)
+      v(0,0,0)
+      v(0,0,@lz)
+      v(@lx,0,@lz)
+      v(@lx,0,0)
+      #front
+      GL::Color(1,0,0)
+      v(0,@ly,0)
+      v(@lx,@ly,0)
+      v(@lx,@ly,@lz)
+      v(0,@ly,@lz)
+      #left
+      GL::Color(1,0,1)
+      v(0,0,0)
+      v(0,@ly,0)
+      v(0,@ly,@lz)
+      v(0,0,@lz)
+      #right
+      GL::Color(1,1,0)
+      v(@lx,0,0)
+      v(@lx,@ly,0)
+      v(@lx,@ly,@lz)
+      v(@lx,0,@lz)    
+      GL::End()
+      
+      GL::PopMatrix()
+    end
+    
+    def v(x,y,z)
+      GL::Vertex3d(x-@lx/2,y-@ly/2,z-@lz/2)
+    end
+    
   end
   
   
