@@ -1,4 +1,4 @@
-require 'ode'
+require 'mode'
 require 'worldobject'
 require 'camera'
 STEP = 0.005
