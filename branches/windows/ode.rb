@@ -1,3 +1,12 @@
+class Array
+  
+  def x; self[0]; end
+  def y; self[1]; end
+  def z; self[2]; end
+  
+end
+
+
 module ODE
   
   #  class Position
@@ -17,7 +26,6 @@ module ODE
   #  end
   
   class Geometry
-    attr_accessor :position
     
     def initialize
       @position = MVector.new
@@ -30,12 +38,14 @@ module ODE
     end
     
     def add_force(f)
+      #puts "Add_force: #{f.join(',')}"
       @forces << MVector.new(f)
     end
     
     def apply_forces
       @forces.each { |f|
-        @position = @position + f 
+        #puts "Applying force: #{f}"
+        @position = @position + f
       }
       @forces = []  
     end
@@ -91,7 +101,7 @@ module ODE
     #    end
     
     def step(st)
-      puts 'step'
+      #puts 'step'
       @spaces.each {|s| s.step(st)}
     end
     

@@ -5,7 +5,7 @@ class Camera
   attr_accessor :pos, :view, :rot
   
   def initialize
-    @pos  = MVector.new(-1,-5,5)
+    @pos  = MVector.new(-1,-10,10)
     @view = MVector.new(0,0,0)
     @rot  = MVector.new(0,0,1)
     #@pos  = MVector.new(-5,-5,5)
