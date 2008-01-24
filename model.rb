@@ -1,9 +1,12 @@
 require 'mode'
 require 'worldobject'
 require 'camera'
+require 'world.rb'
+
 STEP = 0.005
 
 class MechaSimModel
+  include World
   
   attr_accessor :joy1x, :joy1y, :joy2x, :joy2y
   attr_accessor :robot, :space, :cam
@@ -20,7 +23,9 @@ class MechaSimModel
     
     #robot
     @robot = ODE::Box.new(1,1,1,@space)
-#    @robot.body.position = [0,0,2]
+    
+    # TODO: ca marche pas.....
+    #@robot.position = [0,0,2]
     
     # second body for joint test
     
@@ -43,10 +48,10 @@ class MechaSimModel
     #j.attach(body,@robot.body)
     
     
-    #40.times { |i|
-    #  o = ODE::Geometry::Box.new(1,1,1,@space)
-    #  o.position = [rand(16)-8,rand(16)-8,rand(16)-8]
-    #}
+#    40.times { |i|
+#      o = ODE::Box.new(1,1,1,@space)
+#      o.position = [rand(16)-8,rand(16)-8,rand(16)]
+#    }
     
     # ground
     #body = @world.createBody
@@ -56,6 +61,8 @@ class MechaSimModel
     #geom.rotation = [45,0,0,0]
     
     @cam = Camera.new
+
+    load_world
   end
   
   def update
