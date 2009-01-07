@@ -19,6 +19,10 @@ CONFIG = {
     :collision => nil,
     :camera => nil,
     :debug => nil
-  }
+  },
+  
+  :mouse => {
+    :speed_factor => 0.2
+    }
   
 }
