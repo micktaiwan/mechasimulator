@@ -103,18 +103,24 @@ class PlaneWorld < World
   
   def key(k, x, y)
     case k
-      when GLUT::KEY_UP
-        @cam.pos.x += 1 
-      when GLUT::KEY_DOWN
-        @cam.pos.x -= 1 
-      when GLUT::KEY_LEFT
-        @cam.pos.y += 1 
-      when GLUT::KEY_RIGHT
-        @cam.pos.y -= 1 
       when 13 # Enter
         @editing = @editing==true ? nil : true
       when 8 # Backspace
         @dsl.reload
+    end
+    super
+  end
+
+  def special(k, x, y)
+    case k
+      when GLUT::KEY_UP
+        @cam.pos.y += 1 
+      when GLUT::KEY_DOWN
+        @cam.pos.y -= 1 
+      when GLUT::KEY_LEFT
+        @cam.pos.x -= 1 
+      when GLUT::KEY_RIGHT
+        @cam.pos.x += 1 
     end
     super
   end

@@ -1,7 +1,7 @@
 # box
 object
   
-  box(v(1,1,0), v(1.2,2,1))
+  box(v(1,1,1), v(1.2,2,2))
   #fix :first
   boundary :all, :z, :>, 0
   gravity  :all
