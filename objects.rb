@@ -3,11 +3,11 @@ object :lower
   box(v(1,1,0), v(1.2,2,1))
   boundary :all, :z, :>, 0
   gravity  :all
+  mass 4
 end_object
 
 object :upper
   box(v(1.2,1,1), v(2.2,2,1.2))
-  boundary :all, :z, :>, 0
   gravity  :all
 end_object
 

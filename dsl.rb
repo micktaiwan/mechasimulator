@@ -47,6 +47,10 @@ class DSL
     @current_object.f(:gravity, p)
   end
   
+  def mass(value)
+    @current_object.particles.each{ |p| p.set_mass(value) }
+  end
+  
   def fix p
     p = resolve(p)
     @current_object.c(:fixed,p)
