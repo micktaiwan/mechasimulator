@@ -1,12 +1,25 @@
 # box
-object
-  
-  box(v(1,1,1), v(1.2,2,2))
-  #fix :first
+object :lower
+  box(v(1,1,0), v(1.2,2,1))
   boundary :all, :z, :>, 0
   gravity  :all
-
 end_object
+
+object :upper
+  box(v(1.2,1,1), v(2.2,2,1.2))
+  boundary :all, :z, :>, 0
+  gravity  :all
+end_object
+
+
+join :lower, :upper, [1.2,1,1], [1.2,2,1] 
+
+#all_objects do
+#  boundary :all, :z, :>, 0
+#  gravity  :all
+#end
+
+
 
 return
 

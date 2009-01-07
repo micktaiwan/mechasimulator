@@ -8,6 +8,7 @@ require 'dsl'
 class PlaneWorld < World
   
   def draw
+    t = GLUT.Get(GLUT::ELAPSED_TIME)
     # clear
     GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
     GL::LoadIdentity()
@@ -23,11 +24,12 @@ class PlaneWorld < World
 
     # ps
     if(@editing)
-      #reload file
-      d = File.stat('objects.rb').mtime
-      if d != @old_file_stat
-        @dsl.reload
-        @old_file_stat = d
+      if(t - @t0 >= 1000)
+        d = File.stat('objects.rb').mtime
+        if d != @old_file_stat
+          @dsl.reload # reload objects
+          @old_file_stat = d
+        end
       end
     else
       @ps.next_step
@@ -84,7 +86,6 @@ class PlaneWorld < World
     GLUT.SwapBuffers()
 
     @frames += 1
-    t = GLUT.Get(GLUT::ELAPSED_TIME)
     
     #x = @cam.pos.x = Math.cos(t/50000.0)*6
     #y = @cam.pos.y = Math.sin(t/50000.0)*6
@@ -130,7 +131,7 @@ class PlaneWorld < World
     GLUT.InitWindowPosition(0, 0)
     f = 4
     GLUT.InitWindowSize(320*f,240*f)
-    GLUT.CreateWindow('World')
+    GLUT.CreateWindow('mecha')
     GL.ClearColor(0.0, 0.0, 0.0, 0.0)
     GL.ShadeModel(GL::SMOOTH)
     GL.DepthFunc(GL::LEQUAL)

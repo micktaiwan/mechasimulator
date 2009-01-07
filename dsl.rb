@@ -19,7 +19,6 @@ class DSL
   end
   
   def p(x,y,z,mass=1.0)
-    #@console.push "particule"
     p = Particle.new(x,y,z)
     p.set_mass(mass)
     @current_object << p
@@ -36,8 +35,7 @@ class DSL
   
   
   def object(name=nil)
-    #@console.push "object"
-    @current_object = PSObject.new
+    @current_object = PSObject.new(name)
   end
 
   def end_object
@@ -80,6 +78,15 @@ class DSL
     p = resolve(p)
     @current_object.f(:uni, p, vector)
   end
+  
+  def join name1, name2, *list
+    l = []
+    list.each { |x,y,z|
+      l << [x,y,z]
+      }
+    @ps.join(@ps.find_object_by_name(name1),@ps.find_object_by_name(name2),l)
+  end
+  
   
   def v(x,y,z)
     MVector.new(x,y,z)

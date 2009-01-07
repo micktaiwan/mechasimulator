@@ -27,7 +27,7 @@ CONFIG = {
   
   :draw => {
     :point_size  =>6,
-    :constraints => nil
+    :constraints => true
     }
     
   
