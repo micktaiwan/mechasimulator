@@ -47,7 +47,7 @@ class Particle
 
   attr_accessor :current, :old, :acc # 3D vectors
   attr_accessor :forces
-  attr_reader :invmass
+  attr_reader   :invmass
   
   def initialize(x,y,z)
     c = MVector.new(x.to_f,y.to_f,z.to_f)
@@ -78,6 +78,17 @@ class Constraint
     @type, @particles, @value = t, p, v
   end
   
+  def replace(old,new)
+    if @particles.respond_to?(:current)
+      @particles = new if @particles == old
+    else
+    @particles.each_index { |i|
+        @particles[i] = new if @particles[i] == old
+        }
+    end
+  end
+  
+  
   def boundary_component
     @value[0]
   end
@@ -96,9 +107,10 @@ end
 # A ParticleSystem object is just a set of particle with constraints
 class PSObject
 
-  attr_accessor :particles, :constraints
+  attr_accessor :particles, :constraints, :name
 
-  def initialize
+  def initialize(name)
+    @name = name
     @particles = []
     @constraints = []
   end
@@ -106,6 +118,16 @@ class PSObject
   def <<(p)
     @particles << p
     p
+  end
+  
+  def >>(p)
+    @particles.delete(p)
+  end
+  
+  def find_part_by_pos(arr)
+    @particles.each { |p|
+      return p if p.current.x==arr.first and p.current.y==arr[1] and p.current.z==arr.last
+      }
   end
   
   def size
@@ -194,8 +216,31 @@ class ParticleSystem
     verlet
     satisfy_constraints
   end
+  
+  def join(obj1, obj2, list)
+    list.each { |arr|
+      # verify that all particles in list are shared by obj1 and obj2
+      p1 = obj1.find_part_by_pos(arr)
+      p2 = obj2.find_part_by_pos(arr)
+      raise "join particule not found in #{obj1.name}" if not p1
+      raise "join particule not found in #{obj2.name}" if not p2
+      # in obj2, replace p2 by p1
+      obj2 >> p2
+      obj2 << p1
+      # in every constraint containing p2, replace p2 by p1
+      @constraints.each { |c|
+        c.replace(p2,p1)
+        }
+      # remove p2 from world
+      @particles.delete(p2)
+      # p2 forces are lost
+      }
+  end
 
-
+  def find_object_by_name(name)
+    @objects.select{|o| o.name == name}.first
+  end
+  
 private
   
   # Verlet integration step
