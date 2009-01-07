@@ -84,11 +84,11 @@ class PlaneWorld < World
     @frames += 1
     t = GLUT.Get(GLUT::ELAPSED_TIME)
     
-    x = @cam.pos.x = Math.cos(t/50000.0)*6
-    y = @cam.pos.y = Math.sin(t/50000.0)*6
-    scale = 45/Math.atan(1) 
-    a = (scale*Math.atan2(y,x))+90
-    @cam.rot.z = -a
+    #x = @cam.pos.x = Math.cos(t/50000.0)*6
+    #y = @cam.pos.y = Math.sin(t/50000.0)*6
+    #scale = 45/Math.atan(1) 
+    #a = (scale*Math.atan2(y,x))+90
+    #@cam.rot.z = -a
    
     if t - @t0 >= 1000
       seconds = (t - @t0) / 1000.0

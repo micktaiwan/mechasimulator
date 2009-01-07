@@ -81,6 +81,50 @@ class DSL
     @current_object.f(:uni, p, vector)
   end
   
+  def v(x,y,z)
+    MVector.new(x,y,z)
+  end
+  
+  def attach(a,b,c,d)
+  string a,b
+  string b,c
+  string c,d
+  string d,a
+  
+  string a,c
+  string b,d
+  end
+
+  def box(p1, p2)
+
+    # bottom
+    a = p(p1.x,p1.y,p1.z)
+    b = p(p2.x,p1.y,p1.z)
+    c = p(p2.x,p2.y,p1.z)
+    d = p(p1.x,p2.y,p1.z)
+    attach(a,b,c,d)
+
+    # up
+    e = p(p1.x,p1.y,p2.z)
+    f = p(p2.x,p1.y,p2.z)
+    g = p(p2.x,p2.y,p2.z)
+    h = p(p1.x,p2.y,p2.z)
+    attach(e,f,g,h)
+    
+    # left
+    attach(a,e,h,d)
+    
+    # right
+    attach(b,f,g,c)
+
+    # front
+    attach(a,b,e,f)
+
+    # rear
+    attach(d,c,g,h)
+  end
+
+  
 private
   def resolve p
     return @current_object[p] if p.class == Fixnum
