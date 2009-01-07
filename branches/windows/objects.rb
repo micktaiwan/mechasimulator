@@ -1,40 +1,14 @@
 # box
 object
-
-  p(0,0,2)
-  p(1,0,2)
-  p(1,2,2)
-  p(0,2,2)
-
-  fix p(0,0,2.5)
-  fix p(1,0,2.5)
-  p(1,2,2.5)
-  p(0,2,2.5)
-
-  string 0,4
-  string 1,5
-  string 2,6
-  string 3,7
-
-  string 0,1
-  string 1,2
-  string 2,3
-  string 3,0
-
-  string 4,5
-  string 5,6
-  string 6,7
-  string 7,4
-
-  string 0,6
-  string 1,7
-  string 2,4
-  string 3,5
-
+  
+  box(v(0,1,3), v(1,3,4))
+  fix :first
   boundary :all, :z, :>, 0
   gravity  :all
 
 end_object
+
+return
 
 # a necklace
 object

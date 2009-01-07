@@ -6,7 +6,7 @@ class Camera
   
   def initialize
     @pos  = MVector.new(1,-4,2)
-    @rot  = MVector.new(-80,0,260)
+    @rot  = MVector.new(-80,0,-10)
   end
   
   # rotx, roty: rotation along x and y
