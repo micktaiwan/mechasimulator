@@ -3,15 +3,24 @@ class MVector
   attr_accessor :x,:y,:z
   
   def initialize(x=0,y=0,z=0)
-    if x.class.to_s == "Array"
-      from_a(x)
-    else
       @x,@y,@z = x,y,z
-    end
+  end
+  
+  # helpers methods
+  def component_set(component,value)
+    send("#{component}=", value)
+  end
+  
+  def component_value(component)
+    send("#{component}")
   end
   
   def from_a(arr)
     @x, @y, @z = arr[0],arr[1],arr[2]
+  end
+
+  def to_a
+    [@x, @y, @z]
   end
   
   def to_s
@@ -33,40 +42,38 @@ class MVector
   def /( scalar )
     MVector.new(@x/scalar,@y/scalar,@z/scalar)
   end
-  
-  
-  def rotate!(a,b,c)
-    #@x = @x*Math.cos(a)-@y*Math.sin(a)
-    #@y = @y*Math.cos(a)-@x*Math.sin(a)
     
-    @x = @x*Math.cos(-a)-@z*Math.sin(-a)
-    @z = @z*Math.cos(-a)-@x*Math.sin(-a)
-    
-    @y = @y*Math.cos(-b)-@z*Math.sin(-b)
-    @z = @z*Math.cos(-b)-@y*Math.sin(-b)
-  end
-  
-  ### Normalizes the vector in place.
+  # Normalizes the vector in place.
   def normalize!
-    @x /= length
-    @y /= length
-    @z /= length
+    l = length
+    raise "vector lenght is 0" if l == 0
+    @x /= l
+    @y /= l
+    @z /= l
     self
   end
+
+  # Normalizes the vector in place.
+  def normalize
+    l = length
+    l = 0.00001 if l == 0
+    MVector.new(@x/l, @y/l, @z/l)
+  end
+
   
-  ### Returns the magnitude of the vector, measured in the Euclidean norm.
+  # Returns the magnitude of the vector, measured in the Euclidean norm.
   def length
     Math.sqrt( self.sqr )
   end
   
   
-  ### Returns the dot product of the vector with itself, which is also the
-  ### squared length of the vector, as measured in the Euclidean norm.
+  # Returns the dot product of the vector with itself, which is also the
+  # squared length of the vector, as measured in the Euclidean norm.
   def sqr
     self.dot( self )
   end
   
-  ### Return the dot-product
+  # Return the dot-product
   def dot(v)
     scalar = 0.0
     scalar += @x*v.x
@@ -74,5 +81,11 @@ class MVector
     scalar += @z*v.z
     return scalar
   end
+  
+  def cross(v)
+    # (a2b3 - a3b2, a3b1 - a1b3, a1b2 - a2b1)
+    MVector.new(@y*v.z - @z*v.y, @z*v.x - @x*v.z, @x*v.y - @y*v.x)
+  end
+  
   
 end
