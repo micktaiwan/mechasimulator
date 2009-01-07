@@ -34,7 +34,7 @@ class PlaneWorld < World
     end
 
     # draw particles and forces
-    GL::PointSize(8)
+    GL::PointSize(4)
     GL::LineWidth(3)
     @ps.particles.each { |p|
       GL::Color(0.6, 0.6, 0.6)
@@ -128,7 +128,8 @@ class PlaneWorld < World
   def init
     GLUT.InitDisplayMode(GLUT::RGBA | GLUT::DEPTH | GLUT::DOUBLE)
     GLUT.InitWindowPosition(0, 0)
-    GLUT.InitWindowSize(1280, 940)
+    f = 4
+    GLUT.InitWindowSize(320*f,240*f)
     GLUT.CreateWindow('World')
     GL.ClearColor(0.0, 0.0, 0.0, 0.0)
     GL.ShadeModel(GL::SMOOTH)

@@ -14,10 +14,9 @@ class DSL
       @console.push "#{@ps.particles.size} particules reloaded"
     rescue Exception => e
       @console.push "Error in the objects.rb file:\n*** #{e.message}"
-      raise
+      #raise
     end
   end
- 
   
   def p(x,y,z,mass=1.0)
     #@console.push "particule"
@@ -66,6 +65,12 @@ class DSL
     end
   end
   
+  def boundary p, a, b, c
+    p = resolve(p)
+    @current_object.c(:boundary,p,[a,b,c])
+  end
+  
+  
   def motor p, center, normal_vector, power
     p = resolve(p)
     @current_object.f(:motor, p, [center,normal_vector,power])
@@ -78,6 +83,7 @@ class DSL
   
 private
   def resolve p
+    return @current_object[p] if p.class == Fixnum
     return @current_object[0]  if p==:first
     return @current_object[-1] if p==:last
     return [@current_object[-2], @current_object[-1]] if p==:last_two

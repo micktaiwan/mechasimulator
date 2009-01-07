@@ -126,8 +126,8 @@ class PSObject
       end
     end
     if particles == :all
-      @particles.each_with_index { |p,i|
-        @constraints << Constraint.new(type, i, values)
+      @particles.each { |p|
+        @constraints << Constraint.new(type, p, values)
         }
     else
       @constraints << Constraint.new(type, particles, values)
