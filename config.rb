@@ -2,7 +2,7 @@ CONFIG = {
   
   :joy => { # joystick configuration
     :dev => '/dev/input/js0',
-    :factor => (32000.0/16),
+    :factor => (32000.0),
     :control => 'robot', # 'robot' or 'camera'
     :axe1x => 0,
     :axe1y => 1,
@@ -17,7 +17,18 @@ CONFIG = {
     :pos   => nil,
     :event => nil,
     :collision => nil,
-    :camera => nil
-  }
+    :camera => nil,
+    :debug => nil
+  },
+  
+  :mouse => {
+    :speed_factor => 0.2
+    },
+  
+  :draw => {
+    :point_size  =>6,
+    :constraints => nil
+    }
+    
   
 }
