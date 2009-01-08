@@ -73,6 +73,9 @@ class DSL
     @ps.c(:boundary,p,[a,b,c])
   end
   
+  def console str
+    @console.push str
+  end
   
   def motor p, center, normal_vector, power
     p = resolve(p)
