@@ -88,7 +88,7 @@ class DSL
     @ps.f(:uni, p, vector)
   end
   
-  def gravit p, toward, opt
+  def gravit(p, toward, opt={})
     p = resolve(p)
     toward = resolve(toward)
     @ps.f(:gravit, p, [toward, opt])
