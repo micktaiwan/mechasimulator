@@ -203,3 +203,21 @@ end_object
 
 gravity :all
 boundary :all, :z, :>, 0
+
+
+
+
+object
+  fix a = p(0,0,1)
+  
+  20.times {
+    p(5-rand(10),5-rand(10),5-rand(10))
+    gravit :last, a, {}
+    uni :last, [rand(20)/10.0,rand(20)/10.0,rand(20)/10.0]
+    string :last_two
+    }
+end_object
+
+
+
+

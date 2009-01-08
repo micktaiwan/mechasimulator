@@ -19,6 +19,7 @@ class Force
       @length = v[2]
     when :gravit
       @toward = resolve(v[0])
+      @opt = v[1]
     when :uni
       @cache = MVector.new(v[0],v[1],v[2])
     end
@@ -46,7 +47,8 @@ private
   end
   
   def calculate_gravit_force
-    @toward.current - @particle.current
+    v = (@toward.current - @particle.current)
+    v *= @opt[:factor] if @opt[:factor]
   end
   
   def resolve(v)
