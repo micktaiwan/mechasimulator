@@ -72,7 +72,7 @@ class Constraint
 
   attr_accessor :type,      # :fixed, :string, :boundary
                 :particles, # particle, or [p1, p2] (for string)
-                :value      # can be [x,y,z] (for fixed) or a [particle, distance] (for string) or a [coord, sup or inf, value] (for a boundary)
+                :value      # can be [x,y,z] (for fixed) or a distance (for string) or a [coord, sup or inf, value] (for a boundary)
   
   def initialize(t,p,v)
     @type, @particles, @value = t, p, v
@@ -88,8 +88,8 @@ class Constraint
     end
   end
   
-  # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!
   def add_length(value)
+    return if type != :string
     @value += value
   end 
   
