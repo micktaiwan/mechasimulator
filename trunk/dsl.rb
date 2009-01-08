@@ -104,9 +104,9 @@ class DSL
     o.find_part_by_pos(pos)
   end
   
-  def follow p
+  def follow p, opt=nil
     p = resolve(p)
-    @cam.set_follow(p, :current)
+    @cam.set_follow(p, :current, :direction, opt)
   end
   
   

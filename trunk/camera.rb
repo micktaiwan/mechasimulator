@@ -7,7 +7,7 @@ class Camera
   def initialize
     @pos  = MVector.new(1,-4,2)
     @rot  = MVector.new(-80,0,-10)
-    @follow_obj = nil
+    @follow = {:obj=>nil}
   end
   
   # rotx, roty: rotation along x and y
@@ -28,17 +28,29 @@ class Camera
   end
   
   # give a object and a method to to call to get a MVector (a point) to follow
-  def set_follow(obj,method)
-    @follow_obj     = obj
-    @follow_method  = method
+  # opt can be nil or [:pos, distance], meaning change cam pos following p at distance
+  # to do that we need to call a method that gives us a direction vector
+  def set_follow(obj, obj_pos_method=nil, obj_dir_method=nil, opt=nil)
+    @follow     = {:obj=>obj, :m=>obj_pos_method, :dir=>obj_dir_method, :opt=>opt}
   end
   
   def follow
-    return if not @follow_obj
-    point = @follow_obj.send(@follow_method)
-    x = @pos.x - point.x
-    y = @pos.y - point.y
-    #z = @pos.z - point.z
+    return if not @follow[:obj]
+    pos = @follow[:obj].send(@follow[:m])
+    
+    if(opt = @follow[:opt])
+      if (d = opt[:distance]) # only supported option for now
+        d = 0.001 if d == 0
+        dir = @follow[:obj].send(@follow[:dir]).normalize
+        tan = dir.cross(MVector.new(0,0,1)).normalize * d
+        @pos = pos - (dir*d)
+        @pos = @pos - tan
+      end
+    end
+
+    x = @pos.x - pos.x
+    y = @pos.y - pos.y
+    #z = @pos.z - pos.z
     scale = 45/Math.atan(1) 
     rotz = (scale*Math.atan2(y,x))+90
     @rot.z = -rotz
