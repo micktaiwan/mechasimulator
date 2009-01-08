@@ -33,24 +33,24 @@ actuator1 = string p1, p2
 p1 = find_particle(:lower,[1,2,1])
 p2 = find_particle(:upper,[1.2,2,1.2])
 actuator2 = string p1, p2
-p1 = find_particle(:upper,[2.2,1,1.2])
-p2 = find_particle(:end,[2.4,1,1])
-actuator3 = string p1, p2
-p1 = find_particle(:upper,[2.2,2,1.2])
-p2 = find_particle(:end,[2.4,2,1])
-actuator4 = string p1, p2
+
+#p1 = find_particle(:upper,[2.2,1,1.2])
+#p2 = find_particle(:end,[2.4,1,1])
+#actuator3 = string p1, p2
+#p1 = find_particle(:upper,[2.2,2,1.2])
+#p2 = find_particle(:end,[2.4,2,1])
+#actuator4 = string p1, p2
 # controls
 control 'o', [actuator1, actuator2], :add_length, -0.01
 control 'p', [actuator1, actuator2], :add_length,  0.01
 
-control 'l', [actuator3, actuator4], :add_length, -0.01
-control 'm', [actuator3, actuator4], :add_length,  0.01
+#control 'l', [actuator3, actuator4], :add_length, -0.01
+#control 'm', [actuator3, actuator4], :add_length,  0.01
 
 
 # we're done !
 boundary :all, :z, :>, 0
 #gravity  :all
 
-console "space: constraints on/off"
-console "try pressing 'o' / 'p' and 'l' / 'm' :)"
-console "A little excavator...."
+follow find_particle(:end,[2.4,2,1])
+

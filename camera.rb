@@ -7,6 +7,7 @@ class Camera
   def initialize
     @pos  = MVector.new(1,-4,2)
     @rot  = MVector.new(-80,0,-10)
+    @follow_obj = nil
   end
   
   # rotx, roty: rotation along x and y
@@ -24,6 +25,23 @@ class Camera
     @rot.x -= rotx
     @rot.z -= rotz
 
+  end
+  
+  # give a object and a method to to call to get a MVector (a point) to follow
+  def set_follow(obj,method)
+    @follow_obj     = obj
+    @follow_method  = method
+  end
+  
+  def follow
+    return if not @follow_obj
+    point = @follow_obj.send(@follow_method)
+    x = @pos.x - point.x
+    y = @pos.y - point.y
+    #z = @pos.z - point.z
+    scale = 45/Math.atan(1) 
+    rotz = (scale*Math.atan2(y,x))+90
+    @rot.z = rotz
   end
   
 end
