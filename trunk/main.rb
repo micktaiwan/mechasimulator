@@ -113,6 +113,8 @@ class PlaneWorld < World
         @editing = @editing==true ? nil : true
       when 8 # Backspace
         @dsl.reload
+      when 32 # space
+        CONFIG[:draw][:constraints] = CONFIG[:draw][:constraints]? nil : true
     end
     super
   end
