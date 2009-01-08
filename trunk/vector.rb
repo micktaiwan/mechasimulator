@@ -15,6 +15,10 @@ class MVector
     send("#{component}")
   end
   
+  def ==(v)
+    @x==v.x and @y==v.y and @z==v.z
+  end
+  
   def from_a(arr)
     @x, @y, @z = arr[0],arr[1],arr[2]
   end
@@ -65,7 +69,6 @@ class MVector
   def length
     Math.sqrt( self.sqr )
   end
-  
   
   # Returns the dot product of the vector with itself, which is also the
   # squared length of the vector, as measured in the Euclidean norm.
