@@ -31,23 +31,25 @@ class Camera
   # opt can be nil or [:pos, distance], meaning change cam pos following p at distance
   # to do that we need to call a method that gives us a direction vector
   def set_follow(obj, obj_pos_method=nil, obj_dir_method=nil, opt=nil)
-    @follow     = {:obj=>obj, :m=>obj_pos_method, :dir=>obj_dir_method, :opt=>opt}
+    @follow     = {:obj=>obj, :pos_m=>obj_pos_method, :dir_m=>obj_dir_method, :opt=>opt}
   end
   
   def follow
     return if not @follow[:obj]
-    pos = @follow[:obj].send(@follow[:m])
+    pos = @follow[:obj].send(@follow[:pos_m])
     
     if(opt = @follow[:opt])
-      if (d = opt[:distance]) # only supported option for now
+      if (d = opt[:distance])
         d = 0.001 if d == 0
-        dir = @follow[:obj].send(@follow[:dir]).normalize
+        dir = @follow[:obj].send(@follow[:dir_m]).normalize
         @pos = pos - (dir*d)
         if(opt[:side])
           tan = dir.cross(MVector.new(0,0,1)).normalize * opt[:side]
           @pos = @pos - tan
         end
         @pos.z = pos.z
+      elsif (from = opt[:position]) # mutually exclusive with distance
+        @pos = from.send(@follow[:pos_m])
       end
     end
 
