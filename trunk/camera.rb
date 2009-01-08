@@ -41,7 +41,7 @@ class Camera
     #z = @pos.z - point.z
     scale = 45/Math.atan(1) 
     rotz = (scale*Math.atan2(y,x))+90
-    @rot.z = rotz
+    @rot.z = -rotz
   end
   
 end
