@@ -42,9 +42,12 @@ class Camera
       if (d = opt[:distance]) # only supported option for now
         d = 0.001 if d == 0
         dir = @follow[:obj].send(@follow[:dir]).normalize
-        tan = dir.cross(MVector.new(0,0,1)).normalize * d
         @pos = pos - (dir*d)
-        @pos = @pos - tan
+        if(opt[:side])
+          tan = dir.cross(MVector.new(0,0,1)).normalize * opt[:side]
+          @pos = @pos - tan
+        end
+        @pos.z = pos.z
       end
     end
 
