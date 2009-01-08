@@ -82,12 +82,16 @@ class Constraint
     if @particles.respond_to?(:current)
       @particles = new if @particles == old
     else
-    @particles.each_index { |i|
+      @particles.each_index { |i|
         @particles[i] = new if @particles[i] == old
         }
     end
   end
   
+  # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  def add_length(value)
+    @value += value
+  end 
   
   def boundary_component
     @value[0]
@@ -103,16 +107,17 @@ class Constraint
   
 end
 
+#class CString < Constraint
+#end
 
 # A ParticleSystem object is just a set of particle with constraints
 class PSObject
 
-  attr_accessor :particles, :constraints, :name
+  attr_accessor :particles, :name
 
   def initialize(name)
     @name = name
     @particles = []
-    @constraints = []
   end
   
   def <<(p)
@@ -137,53 +142,7 @@ class PSObject
   def[](i)
     @particles[i]
   end
-  
-  def add_constraint(type,particles,values=nil)
-    if values == nil
-      if type == :string
-        d = particles[0].current - particles[1].current        
-        values = Math.sqrt(d.dot(d))
-      elsif type == :fixed
-        values = particles.current.to_a
-      end
-    end
-    if particles == :all
-      @particles.each { |p|
-        @constraints << Constraint.new(type, p, values)
-        }
-    else
-      @constraints << Constraint.new(type, particles, values)
-    end
-  end
-  alias :c :add_constraint
-  
-  def add_force(type, particles, values=nil)
-     if particles == :all
-      @particles.each { |p|
-        p.add_force(type, values)
-        }
-    else
-      particles.add_force(type, values)
-    end
-  end
-  alias :f :add_force
-  
-  def finalize
-    sort_constraints
-    self
-  end
-  
-private
-  def sort_constraints
-    @constraints = @constraints.sort_by {|c|
-      case c.type
-      when :string;   1
-      when :boundary; 2
-      when :fixed;    3
-      end
-      } 
-  end
-  
+    
 end
 
 class ParticleSystem
@@ -206,9 +165,9 @@ class ParticleSystem
   end
   
   def <<(o)
-    @objects << o.finalize
+    @objects << o
     o.particles.each   { |p| @particles   << p }
-    o.constraints.each { |p| @constraints << p }
+    #o.constraints.each { |p| @constraints << p }
   end
   
   def next_step
@@ -216,6 +175,44 @@ class ParticleSystem
     verlet
     satisfy_constraints
   end
+  
+  def add_constraint(type,particles,values=nil)
+  
+    if values == nil
+      if type == :string
+        d = particles[0].current - particles[1].current        
+        values = Math.sqrt(d.dot(d))
+      elsif type == :fixed
+        values = particles.current.to_a
+      end
+    end
+    
+    if particles == :all
+      @particles.each { |p|
+        c = Constraint.new(type, p, values)
+        @constraints << c
+        }
+    else
+      c = Constraint.new(type, particles, values)
+      @constraints << c
+    end
+    sort_constraints # didn't want to add a 'start' keyword or something to call the method optimize before the sim start
+    c
+  end
+  
+  alias :c :add_constraint
+  
+  def add_force(type, particles, values=nil)
+     if particles == :all
+      @particles.each { |p|
+        p.add_force(type, values)
+        }
+    else
+      particles.add_force(type, values)
+    end
+  end
+  
+  alias :f :add_force
   
   def join(obj1, obj2, list)
     list.each { |arr|
@@ -239,6 +236,21 @@ class ParticleSystem
 
   def find_object_by_name(name)
     @objects.select{|o| o.name == name}.first
+  end
+  
+  def optimize
+    sort_constraints
+  end
+  
+private
+  def sort_constraints
+    @constraints = @constraints.sort_by {|c|
+      case c.type
+      when :string;   1
+      when :boundary; 2
+      when :fixed;    3
+      end
+      } 
   end
   
 private

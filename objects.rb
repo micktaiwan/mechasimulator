@@ -1,25 +1,37 @@
-# box
+#################
+# excavator arm #
+#################
+
+# first a base
 object :lower
   box(v(1,1,0), v(1.2,2,1))
-  boundary :all, :z, :>, 0
-  gravity  :all
-  mass 4
+  mass 10
 end_object
 
+# then a (soon to be articulated) extension
 object :upper
   box(v(1.2,1,1), v(2.2,2,1.2))
-  gravity  :all
 end_object
 
-
+# join them together
 join :lower, :upper, [1.2,1,1], [1.2,2,1] 
 
-#all_objects do
-#  boundary :all, :z, :>, 0
-#  gravity  :all
-#end
+# then add some keyboard controlled hydrolic cylinder between the two
+# first actuator
+p1 = find_particle(:lower,[1,1,1])
+p2 = find_particle(:upper,[1.2,1,1.2])
+actuator1 = string p1, p2
+# second actuator
+p1 = find_particle(:lower,[1,2,1])
+p2 = find_particle(:upper,[1.2,2,1.2])
+actuator2 = string p1, p2
+# controls
+control 'o', [actuator1, actuator2], :add_length, -0.01
+control 'p', [actuator1, actuator2], :add_length,  0.01
 
-
+# we're done !
+boundary :all, :z, :>, 0
+gravity  :all
 
 return
 
@@ -33,7 +45,21 @@ object
   gravity :all
 end_object
 
+return
 
+# a strange snake
+object
+  20.times do |i|
+    p(-1+i*0.1,0,1)
+    string :last_two
+  end
+  uni :first, [0,0,0.25]
+  uni :last, [0,0,-0.2]
+end_object
+
+return
+
+# monster
 object
   head = p(0,1,2)
   fix head
