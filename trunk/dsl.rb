@@ -105,6 +105,7 @@ class DSL
   end
   
   def follow p
+    p = resolve(p)
     @cam.set_follow(p, :current)
   end
   
@@ -155,10 +156,11 @@ class DSL
   
 private
   def resolve p
-    return @current_object[p] if p.class == Fixnum
-    return @current_object[0]  if p==:first
-    return @current_object[-1] if p==:last
-    return [@current_object[-2], @current_object[-1]] if p==:last_two
+    o = @current_object ? @current_object : @ps
+    return o[p] if p.class == Fixnum
+    return o[0]  if p==:first
+    return o[-1] if p==:last
+    return [o[-2], o[-1]] if p==:last_two
     p    
   end
 

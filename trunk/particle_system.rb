@@ -171,6 +171,11 @@ class ParticleSystem
     #o.constraints.each { |p| @constraints << p }
   end
   
+  def[](i)
+    @particles[i]
+  end
+
+  
   def next_step
     accumulate_forces
     verlet
