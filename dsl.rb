@@ -88,6 +88,12 @@ class DSL
     @ps.f(:uni, p, vector)
   end
   
+  def gravit p, toward, opt
+    p = resolve(p)
+    toward = resolve(toward)
+    @ps.f(:gravit, p, [toward, opt])
+  end
+  
   def join name1, name2, *list
     l = []
     list.each { |x,y,z|
