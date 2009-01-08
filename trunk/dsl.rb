@@ -3,8 +3,8 @@ require 'particle_system'
 
 class DSL
 
-  def initialize(ps, c, cs)
-    @ps, @console, @controls = ps, c, cs
+  def initialize(ps, c, cs, cam)
+    @ps, @console, @controls, @cam = ps, c, cs, cam
   end
 
   def reload
@@ -102,6 +102,10 @@ class DSL
   def find_particle(obj_name, pos)
     o = @ps.find_object_by_name(obj_name)
     o.find_part_by_pos(pos)
+  end
+  
+  def follow p
+    @cam.set_follow(p, :current)
   end
   
   

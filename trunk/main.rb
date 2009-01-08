@@ -96,6 +96,8 @@ class PlaneWorld < World
     #scale = 45/Math.atan(1) 
     #a = (scale*Math.atan2(y,x))+90
     #@cam.rot.z = -a
+    
+    @cam.follow
    
     if t - @t0 >= 1000
       seconds = (t - @t0) / 1000.0
@@ -154,7 +156,7 @@ class PlaneWorld < World
 
     @ps = ParticleSystem.new
     @controls = Controls.new
-    @dsl = DSL.new(@ps, @console, @controls)
+    @dsl = DSL.new(@ps, @console, @controls, @cam)
     @dsl.reload 
     @editing= nil
     @old_file_stat = nil
