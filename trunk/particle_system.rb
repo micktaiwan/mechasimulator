@@ -1,5 +1,12 @@
 require 'vector'
 
+# helper class that respond to current
+class FalseParticule < MVector
+  def current
+    self
+  end
+end
+
 class Force
   attr_accessor :type, :values
   
@@ -7,13 +14,11 @@ class Force
     @particle, @type, @values = p, t, v
     case @type
     when :motor
-      if v[0].respond_to?(:current)
-        @center = v[0]
-      else
-        @center = MVector.new(v[0][0],v[0][1],v[0][2])
-      end
-      @normal = MVector.new(v[1][0],v[1][1],v[1][2])
+      @center = resolve(v[0])
+      @normal = resolve(v[1])
       @length = v[2]
+    when :gravit
+      @toward = resolve(v[0])
     when :uni
       @cache = MVector.new(v[0],v[1],v[2])
     end
@@ -25,19 +30,29 @@ class Force
         @cache
       when :motor
         calculate_motor_force
+      when :gravit
+        calculate_gravit_force
       else
         raise "ooops, type uknown: #{type}"
     end
   end
   
+private
+  
   def calculate_motor_force
     # (pos - center) x normale
-    if @center.respond_to?(:current)
-      c = @center.current
-    else
-      c = @center
-    end
+    c = @center.current
     ((@particle.current - c).cross(@normal)).normalize * @length
+  end
+  
+  def calculate_gravit_force
+    @toward.current - @particle.current
+  end
+  
+  def resolve(v)
+    if v.respond_to?(:current); return v
+    else;                       return FalseParticule.new(v[0],v[1],v[2])
+    end
   end
   
 end
