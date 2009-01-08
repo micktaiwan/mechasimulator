@@ -64,6 +64,10 @@ class Particle
   def add_force(type, values)
     @forces << Force.new(self, type, values)
   end
+  
+  def direction
+    @current-@old
+  end
 
 end
 
