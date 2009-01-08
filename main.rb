@@ -40,10 +40,13 @@ class PlaneWorld < World
     GL::PointSize(CONFIG[:draw][:point_size])
     GL::LineWidth(3)
     @ps.particles.each { |p|
+      # particles
       GL::Color(0.6, 0.6, 0.6)
       GL::Begin(GL::POINTS)
         v(p.current.x,p.current.y,p.current.z)
       GL::End()
+      next if not CONFIG[:draw][:force]
+      # forces
       p.forces.each { |f|
         next if f.type == :gravity
         case f.type

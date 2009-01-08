@@ -75,6 +75,7 @@ class Constraint
                 :value      # can be [x,y,z] (for fixed) or a distance (for string) or a [coord, sup or inf, value] (for a boundary)
   
   def initialize(t,p,v)
+    raise "string for 2 particules with same position" if t==:string and p[0].current == p[1].current
     @type, @particles, @value = t, p, v
   end
   
