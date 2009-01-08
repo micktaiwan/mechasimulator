@@ -3,8 +3,8 @@ require 'particle_system'
 
 class DSL
 
-  def initialize(ps, c)
-    @ps, @console = ps, c
+  def initialize(ps, c, cs)
+    @ps, @console, @controls = ps, c, cs
   end
 
   def reload
@@ -26,7 +26,7 @@ class DSL
   end
 
   def c(t,i,v=nil)
-    @current_object.c(t,i,v)
+    @ps.c(t,i,v)
   end
   
   def f(t,p,v=nil)
@@ -40,11 +40,12 @@ class DSL
 
   def end_object
     @ps << @current_object
+    @current_object = nil # so :first, :last, ... can not be used anymore
   end
   
   def gravity p
     p = resolve(p)
-    @current_object.f(:gravity, p)
+    @ps.f(:gravity, p)
   end
   
   def mass(value)
@@ -53,34 +54,34 @@ class DSL
   
   def fix p
     p = resolve(p)
-    @current_object.c(:fixed,p)
+    @ps.c(:fixed,p)
   end
   
   def string p1, p2=nil
     p1 = resolve(p1)
     if p2 == nil # p1 should be :last_two
-      return if p1[0] == nil
-      @current_object.c(:string,p1)
+      return nil if p1[0] == nil
+      return @ps.c(:string,p1)
     else
       p2 = resolve(p2)
-      @current_object.c(:string,[p1,p2])
+      return @ps.c(:string,[p1,p2])
     end
   end
   
   def boundary p, a, b, c
     p = resolve(p)
-    @current_object.c(:boundary,p,[a,b,c])
+    @ps.c(:boundary,p,[a,b,c])
   end
   
   
   def motor p, center, normal_vector, power
     p = resolve(p)
-    @current_object.f(:motor, p, [center,normal_vector,power])
+    @ps.f(:motor, p, [center,normal_vector,power])
   end
 
   def uni p, vector
     p = resolve(p)
-    @current_object.f(:uni, p, vector)
+    @ps.f(:uni, p, vector)
   end
   
   def join name1, name2, *list
@@ -89,6 +90,15 @@ class DSL
       l << [x,y,z]
       }
     @ps.join(@ps.find_object_by_name(name1),@ps.find_object_by_name(name2),l)
+  end
+  
+  def control(*args)
+    @controls << args
+  end
+  
+  def find_particle(obj_name, pos)
+    o = @ps.find_object_by_name(obj_name)
+    o.find_part_by_pos(pos)
   end
   
   

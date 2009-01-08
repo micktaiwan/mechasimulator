@@ -4,6 +4,7 @@ require 'config'
 require 'world'
 require 'particle_system'
 require 'dsl'
+require 'controls'
 
 class PlaneWorld < World
   
@@ -103,6 +104,7 @@ class PlaneWorld < World
   end
   
   def key(k, x, y)
+    @controls.action(k.chr,1)
     case k
       when 13 # Enter
         @editing = @editing==true ? nil : true
@@ -146,7 +148,8 @@ class PlaneWorld < World
     GL.EndList()
 
     @ps = ParticleSystem.new
-    @dsl = DSL.new(@ps, @console)
+    @controls = Controls.new
+    @dsl = DSL.new(@ps, @console, @controls)
     @dsl.reload 
     @editing= nil
     @old_file_stat = nil
