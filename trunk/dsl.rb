@@ -79,6 +79,7 @@ class DSL
   
   def motor p, center, normal_vector, power
     p = resolve(p)
+    center = resolve(center)
     @ps.f(:motor, p, [center,normal_vector,power])
   end
 
