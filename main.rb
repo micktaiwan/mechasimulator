@@ -101,6 +101,7 @@ class PlaneWorld < World
       @cam.rot.z = -a
     end
     
+    # done after rotate so the cam still follow if told to do so
     @cam.follow if CONFIG[:cam][:follow]
    
     if t - @t0 >= 1000

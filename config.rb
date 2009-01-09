@@ -19,7 +19,7 @@ CONFIG = {
     },
   
   :draw => {
-    :point_size  =>10,
+    :point_size  =>6,
     :constraints => true,
     :forces => true
     },
