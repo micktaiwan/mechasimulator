@@ -46,6 +46,8 @@ control 'p', [actuator1, actuator2], :add_length,  0.01
 control 'l', [actuator3, actuator4], :add_length, -0.01
 control 'm', [actuator3, actuator4], :add_length,  0.01
 
+control 'axis1', [actuator1, actuator2], :add_length, -0.005
+control 'axis2', [actuator3, actuator4], :add_length, -0.005
 
 # we're done !
 boundary :all, :z, :>, 0

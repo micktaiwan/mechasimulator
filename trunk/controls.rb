@@ -17,8 +17,10 @@ end
 
 class Controls
 
-  def initialize
+  def initialize(j)
+    @joy = j
     @controls = []
+    @axis = Hash.new{0}
   end
   
   def <<(args)
@@ -33,6 +35,20 @@ class Controls
   
   def find_by_input(i)
     @controls.select { |c| c.input == i} 
+  end
+  
+  def joy
+    @axis.each { |n,v|
+      action("axis#{n}",v)
+      }
+    return if not @joy.joy.pending?
+    ev = @joy.joy.ev
+    case ev.type
+    when Joystick::Event::BUTTON
+      action("button#{ev.num}",1) if ev.val > 0
+    when Joystick::Event::AXIS
+      @axis[ev.num] = ev.val/CONFIG[:joy][:factor]
+    end
   end
   
 end

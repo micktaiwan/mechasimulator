@@ -5,6 +5,7 @@ require 'world'
 require 'particle_system'
 require 'dsl'
 require 'controls'
+require 'joy'
 
 class PlaneWorld < World
   
@@ -33,6 +34,7 @@ class PlaneWorld < World
         end
       end
     else
+      @controls.joy if @joy.present?
       @ps.next_step
     end
 
@@ -91,11 +93,13 @@ class PlaneWorld < World
 
     @frames += 1
     
-    #x = @cam.pos.x = Math.cos(t/50000.0)*6
-    #y = @cam.pos.y = Math.sin(t/50000.0)*6
-    #scale = 45/Math.atan(1) 
-    #a = (scale*Math.atan2(y,x))+90
-    #@cam.rot.z = -a
+    if CONFIG[:cam][:rotate] > 0
+      x = @cam.pos.x = Math.cos(t/5000.0)*CONFIG[:cam][:rotate]
+      y = @cam.pos.y = Math.sin(t/5000.0)*CONFIG[:cam][:rotate]
+      scale = 45/Math.atan(1) 
+      a = (scale*Math.atan2(y,x))+90
+      @cam.rot.z = -a
+    end
     
     @cam.follow if CONFIG[:cam][:follow]
    
@@ -159,7 +163,8 @@ class PlaneWorld < World
     GL.EndList()
 
     @ps = ParticleSystem.new
-    @controls = Controls.new
+    @joy = Joy.new(CONFIG[:joy][:dev])
+    @controls = Controls.new(@joy)
     @dsl = DSL.new(@ps, @console, @controls, @cam)
     @dsl.reload 
     @editing= nil

@@ -180,7 +180,7 @@ class ParticleSystem
 
   def initialize(set_of_objects=[])
     @objects = set_of_objects
-    @time_step = 0 # shall absolutely be calculated and set before the sim start
+    @time_step = 0 # shall absolutely be calculated and set before the sim start (in function of fps for example...)
     @gravity = MVector.new(0,0,-9.81)
     @nb_iter = 3
     @particles = []
