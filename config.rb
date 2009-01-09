@@ -29,6 +29,10 @@ CONFIG = {
     :point_size  =>6,
     :constraints => true,
     :forces => true
+    },
+    
+  :cam => {
+    :follow => true
     }
     
   

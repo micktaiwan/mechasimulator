@@ -97,7 +97,7 @@ class PlaneWorld < World
     #a = (scale*Math.atan2(y,x))+90
     #@cam.rot.z = -a
     
-    @cam.follow
+    @cam.follow if CONFIG[:cam][:follow]
    
     if t - @t0 >= 1000
       seconds = (t - @t0) / 1000.0
@@ -117,6 +117,8 @@ class PlaneWorld < World
         @dsl.reload
       when 32 # space
         CONFIG[:draw][:constraints] = CONFIG[:draw][:constraints]? nil : true
+      when '1'[0]
+        CONFIG[:cam][:follow] = CONFIG[:cam][:follow]? nil : true
     end
     super
   end
