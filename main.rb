@@ -119,6 +119,8 @@ class PlaneWorld < World
         CONFIG[:draw][:constraints] = CONFIG[:draw][:constraints]? nil : true
       when '1'[0]
         CONFIG[:cam][:follow] = CONFIG[:cam][:follow]? nil : true
+      when '2'[0]
+        CONFIG[:draw][:forces] = CONFIG[:draw][:forces]? nil : true
     end
     super
   end
