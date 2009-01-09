@@ -2,17 +2,10 @@ CONFIG = {
   
   :joy => { # joystick configuration
     :dev => '/dev/input/js0',
-    :factor => (32000.0),
-    :control => 'robot', # 'robot' or 'camera'
-    :axe1x => 0,
-    :axe1y => 1,
-    :axe2x => 3,
-    :axe2y => 2 
-  },
+    :factor => (32000.0)
+    },
   
-  :sleep => 0.015, # sleep time
-  
-  :log => { # log config
+  :log => { # log config (not used)
     :joy   => nil,
     :pos   => nil,
     :event => nil,
@@ -26,14 +19,14 @@ CONFIG = {
     },
   
   :draw => {
-    :point_size  =>6,
+    :point_size  =>10,
     :constraints => true,
     :forces => true
     },
     
   :cam => {
-    :follow => true
+    :follow => true,
+    :rotate => 0
     }
-    
   
 }
