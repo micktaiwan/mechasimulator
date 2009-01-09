@@ -45,7 +45,7 @@ class PlaneWorld < World
       GL::Begin(GL::POINTS)
         v(p.current.x,p.current.y,p.current.z)
       GL::End()
-      next if not CONFIG[:draw][:force]
+      next if not CONFIG[:draw][:forces]
       # forces
       p.forces.each { |f|
         next if f.type == :gravity
@@ -57,7 +57,7 @@ class PlaneWorld < World
         else
           GL::Color(0.8, 0.4, 0.2)
         end
-        v = p.current+(f.vector/(9.81*2))
+        v = p.current+(f.vector)#/(9.81*2))
         GL::Begin(GL::LINES)
           v(p.current.x,p.current.y,p.current.z)
           v(v.x,v.y,v.z)

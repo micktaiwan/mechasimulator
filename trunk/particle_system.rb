@@ -47,13 +47,20 @@ private
   end
   
   def calculate_gravit_force
-    v = (@toward.current - @particle.current)
+    v  = (@toward.current - @particle.current)
+    l = v.length
+    if @opt[:reverse]
+      v *= (l*l)
+    else
+      v *= 1/(l*l) if(l > 0)
+    end
     v *= @opt[:factor] if @opt[:factor]
+    v
   end
   
   def resolve(v)
     if v.respond_to?(:current); return v
-    else;                       return FalseParticule.new(v[0],v[1],v[2])
+    else; return FalseParticule.new(v[0],v[1],v[2])
     end
   end
   
