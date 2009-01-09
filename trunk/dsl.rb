@@ -132,7 +132,9 @@ class DSL
   end
 
   def box(p1, p2)
-
+    p1 = MVector.new.from_a(p1) if not p1.respond_to?(:cross)
+    p2 = MVector.new.from_a(p2) if not p2.respond_to?(:cross)
+    
     # bottom
     a = p(p1.x,p1.y,p1.z)
     b = p(p2.x,p1.y,p1.z)

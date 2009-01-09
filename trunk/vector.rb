@@ -21,6 +21,7 @@ class MVector
   
   def from_a(arr)
     @x, @y, @z = arr[0],arr[1],arr[2]
+    self
   end
 
   def to_a
