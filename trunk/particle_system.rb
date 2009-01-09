@@ -319,14 +319,11 @@ private
       @constraints.each do |c| # sorted by strings, boundaries, fixed
         case c.type
         when :string
-          p1 = c.particles[0]
-          p2 = c.particles[1]
+          p1, p2 = c.particles[0], c.particles[1]
           restlength = c.value
-          x1 = p1.current
-          x2 = p2.current
-          delta = x2-x1
+          delta = p2.current - p1.current
           deltalength = Math.sqrt(delta.dot(delta))
-          diff = (deltalength-restlength)/(deltalength*(p1.invmass+p2.invmass))
+          diff = (deltalength-restlength) / (deltalength*(p1.invmass+p2.invmass))
           p1.current += delta*(diff*p1.invmass);
           p2.current -= delta*(diff*p2.invmass);
         when :boundary
@@ -334,10 +331,7 @@ private
           # read: p.current.z = 0 if not p.current.z > 0
           p.current.component_set(c.boundary_component,c.boundary_value) if not p.current.component_value(c.boundary_component).send(c.boundary_comparator, c.boundary_value)
         when :fixed
-          p = c.particles
-          p.current.x = c.value[0]
-          p.current.y = c.value[1]
-          p.current.z = c.value[2]
+          c.particles.current.from_a(c.value)
         end # case
       end # constraints
     end # times
