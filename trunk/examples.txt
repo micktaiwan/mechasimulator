@@ -26,7 +26,7 @@ end_object
 join :lower, :upper, [1.2,1,1], [1.2,2,1] 
 join :upper, :end,   [2.2,1,1], [2.2,2,1] 
 
-# then add some keyboard controlled hydrolic cylinder between the two
+# then add some keyboard controlled hydraulic cylinder between the two
 p1 = find_particle(:lower,[1,1,1])
 p2 = find_particle(:upper,[1.2,1,1.2])
 actuator1 = string p1, p2
