@@ -40,7 +40,7 @@ class DSL
 
   def end_object
     @ps << @current_object
-    @current_object = nil # so :first, :last, ... can not be used anymore
+    @current_object = nil # so :first, :last, ... scope is changed
   end
   
   def gravity p
@@ -116,7 +116,6 @@ class DSL
     @cam.set_follow(p, :current, :direction, opt)
   end
   
-  
   def v(x,y,z)
     MVector.new(x,y,z)
   end
@@ -172,5 +171,14 @@ private
     return [o[-2], o[-1]] if p==:last_two
     p    
   end
-
+  
+  # not used, dead code
+  def valid(*args)
+    args.each { |p|
+      p = resolve(p)
+      return nil if p == nil
+      }
+    true
+  end
+  
 end
