@@ -57,14 +57,14 @@ class DSL
     @ps.c(:fixed,p)
   end
   
-  def string p1, p2=nil
-    p1 = resolve(p1)
-    if p2 == nil # p1 should be :last_two
-      return nil if p1[0] == nil
-      return @ps.c(:string,p1)
-    else
+  def string p, p2=nil
+    p = resolve(p)
+    if p2 == nil # default: p1 could be :last_two or an array
+      return nil if p[0] == nil
+      return @ps.c(:string,p)
+    else # user provided 2 points
       p2 = resolve(p2)
-      return @ps.c(:string,[p1,p2])
+      return @ps.c(:string,[p,p2])
     end
   end
   
@@ -114,6 +114,12 @@ class DSL
   def follow p, opt=nil
     p = resolve(p)
     @cam.set_follow(p, :current, :direction, opt)
+  end
+  
+  def surface(*args)
+    arr = []
+    args.each {|p| arr << resolve(p) }
+    @ps.add_poly(arr)
   end
   
   def v(x,y,z)

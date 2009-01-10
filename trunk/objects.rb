@@ -1,11 +1,23 @@
 object
-  nb = 150
-  nb.times do |i|
-    xp = Math::cos(i*Math::PI/10)
-    yp = Math::sin(i*Math::PI/10)
-    pt = p(xp,yp,0)
-    pt.set_mass(150/(i+1))
-    string :last_two
-    gravit -2, -1, {:factor=>-i/10, :reverse=>true} if i > 0
-  end
+  fix p(0,0,0)
+  fix p(1,0,0)
+  fix p(1,1,0)
+  fix p(0,1,0)
+  string 0,1
+  string 1,2
+  string 2,3
+  string 3,0
+  surface 0,1,2,3
+  
+  p(0.5, 0.5, 1)
 end_object
+
+gravity :all
+
+return
+
+object
+  a = p(1,0,0)
+  uni a, [0,0,1]
+end_object
+
