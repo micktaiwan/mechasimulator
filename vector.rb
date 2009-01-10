@@ -35,6 +35,11 @@ class MVector
   def -(v)
     MVector.new(@x-v.x,@y-v.y,@z-v.z)
   end
+
+  def inverse
+    MVector.new(-@x,-@y,-@z)
+  end
+
   
   def +(v)
     MVector.new(@x+v.x,@y+v.y,@z+v.z)

@@ -1,4 +1,6 @@
 require 'vector'
+require 'particle'
+require 'collisions'
 
 # helper class that respond to current
 class FalseParticule < MVector
@@ -65,36 +67,6 @@ private
   end
   
 end
-
-
-class Particle
-
-  attr_accessor :current, :old, :acc # 3D vectors
-  attr_accessor :forces
-  attr_reader   :invmass
-  
-  def initialize(x,y,z)
-    c = MVector.new(x.to_f,y.to_f,z.to_f)
-    @current, @old = c, c
-    @acc = MVector.new(0,0,0)
-    @invmass = 1
-    @forces = []
-  end
-  
-  def set_mass(m)
-    @invmass = 1/m.to_f
-  end
-  
-  def add_force(type, values)
-    @forces << Force.new(self, type, values)
-  end
-  
-  def direction
-    @current-@old
-  end
-
-end
-
 
 class Constraint
 
@@ -171,7 +143,7 @@ class PSObject
   def[](i)
     @particles[i]
   end
-    
+     
 end
 
 class ParticleSystem
@@ -183,8 +155,9 @@ class ParticleSystem
     @time_step = 0 # shall absolutely be calculated and set before the sim start (in function of fps for example...)
     @gravity = MVector.new(0,0,-9.81)
     @nb_iter = 3
-    @particles = []
-    @constraints = []    
+    @particles    = []
+    @constraints  = []    
+    @polys        = []
   end
   
   def clear_objects
@@ -202,12 +175,14 @@ class ParticleSystem
   def[](i)
     @particles[i]
   end
-
   
   def next_step
     accumulate_forces
     verlet
-    satisfy_constraints
+    @nb_iter.times do
+      detect_collisions
+      satisfy_constraints
+    end
   end
   
   def add_constraint(type,particles,values=nil)
@@ -268,6 +243,10 @@ class ParticleSystem
       }
   end
 
+  def add_poly(arr)
+    @polys << Poly.new(arr)
+  end
+
   def find_object_by_name(name)
     @objects.select{|o| o.name == name}.first
   end
@@ -315,26 +294,39 @@ private
   
   # Here constraints are satisfied
   def satisfy_constraints
-    @nb_iter.times do
-      @constraints.each do |c| # sorted by strings, boundaries, fixed
-        case c.type
-        when :string
-          p1, p2 = c.particles[0], c.particles[1]
-          restlength = c.value
-          delta = p2.current - p1.current
-          deltalength = Math.sqrt(delta.dot(delta))
-          diff = (deltalength-restlength) / (deltalength*(p1.invmass+p2.invmass))
-          p1.current += delta*(diff*p1.invmass);
-          p2.current -= delta*(diff*p2.invmass);
-        when :boundary
-          p = c.particles
-          # read: p.current.z = 0 if not p.current.z > 0
-          p.current.component_set(c.boundary_component,c.boundary_value) if not p.current.component_value(c.boundary_component).send(c.boundary_comparator, c.boundary_value)
-        when :fixed
-          c.particles.current.from_a(c.value)
-        end # case
-      end # constraints
-    end # times
+    @constraints.each do |c| # sorted by strings, boundaries, fixed
+      case c.type
+      when :string
+        p1, p2 = c.particles[0], c.particles[1]
+        restlength = c.value
+        delta = p2.current - p1.current
+        deltalength = Math.sqrt(delta.dot(delta))
+        diff = (deltalength-restlength) / (deltalength*(p1.invmass+p2.invmass))
+        p1.current += delta*(diff*p1.invmass);
+        p2.current -= delta*(diff*p2.invmass);
+      when :boundary
+        p = c.particles
+        # read: p.current.z = 0 if not p.current.z > 0
+        p.current.component_set(c.boundary_component,c.boundary_value) if not p.current.component_value(c.boundary_component).send(c.boundary_comparator, c.boundary_value)
+      when :fixed
+        c.particles.current.from_a(c.value)
+      end # case
+    end # constraints
   end # function
+  
+  def detect_collisions
+    # for each particle, find if a collision with a poly occurred
+    # skipping the poly if the particle is already a part of it
+    @particles.each { |p|
+      from = p.old
+      dest = p.current
+      @polys.each { |poly|
+        next if poly.include?(p)
+        point, distance, vector = poly.collision?(p)
+        next if not point
+        sleep(0.1)
+        }
+      }
+  end
   
 end
