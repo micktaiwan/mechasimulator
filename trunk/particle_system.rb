@@ -154,22 +154,22 @@ class ParticleSystem
     @objects = set_of_objects
     @time_step = 0 # shall absolutely be calculated and set before the sim start (in function of fps for example...)
     @gravity = MVector.new(0,0,-9.81)
-    @nb_iter = 3
+    @nb_iter = CONFIG[:ps][:nb_iter]
     @particles    = []
     @constraints  = []    
     @polys        = []
   end
   
-  def clear_objects
+  def clear
     @objects.clear
     @particles.clear
     @constraints.clear
+    @polys.clear
   end
   
   def <<(o)
     @objects << o
     o.particles.each   { |p| @particles   << p }
-    #o.constraints.each { |p| @constraints << p }
   end
   
   def[](i)
@@ -180,8 +180,8 @@ class ParticleSystem
     accumulate_forces
     verlet
     @nb_iter.times do
-      detect_collisions
       satisfy_constraints
+      detect_collisions if CONFIG[:ps][:collisions]
     end
   end
   
@@ -316,16 +316,25 @@ private
   
   def detect_collisions
     # for each particle, find if a collision with a poly occurred
-    # skipping the poly if the particle is already a part of it
+    # skipping the poly if the particle is already a part of it (done in collision.rb)
     @particles.each { |p|
-      from = p.old
-      dest = p.current
       @polys.each { |poly|
-        next if poly.include?(p)
-        point, distance, vector = poly.collision?(p)
+        point, distance, ray = poly.collision?(p)
         next if not point
-        sleep(0.1)
+        # we have a collision !
+        # p is moved
+        p.current = p.old
+        # poly is moved
+        move_poly(poly, point, distance, ray)
         }
+      }
+  end
+  
+  def move_poly(poly, point, distance, ray)
+    poly.particles.each { |p|
+      #print p.current, "=>"
+      p.current = p.old
+      #puts p.current
       }
   end
   
