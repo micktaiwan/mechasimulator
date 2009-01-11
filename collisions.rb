@@ -62,6 +62,7 @@ class Poly
     sum /= @particles.size    
   end
   
+=begin  
   def make_poly(ray)
     arr = @particles.map { |p| 
       v = p.old+ray
@@ -69,6 +70,7 @@ class Poly
       }
     Poly.new(arr)
   end
+=end
   
   # return [distance to intersection, direction vector "ray"]
   # distance should awys be positive, except when there is no intersection with the place, we return -1
@@ -90,8 +92,7 @@ class Poly
   # return [the point where the intersection occurs, distance, ray]
   def intersection_poly(point)
     dist, ray = dist_inter_poly(point) 
-    poly = make_poly(ray*dist)
-    [poly, dist, ray]
+    [point, dist, ray]
   end
 
   
@@ -125,15 +126,17 @@ class Poly
     return NIL4 if include?(p)
     from = p.old
     dest = p.current
+    # detect moving point
     if (classify(from,:current) != classify(dest,:current))
       point, distance, ray = intersection_point(from, dest)
       return NIL4 if not in?(point,:current)
       return [:particle, point, distance, ray]
+      # detect moving poly
     elsif (classify(dest,:current) != classify(dest,:old))
-      poly, distance, ray = intersection_poly(dest)
-      puts poly
-      return NIL4 if not poly.in?(point,:current)
-      return [:poly, point, distance, ray]
+      point, distance, ray = intersection_poly(dest)
+      #return NIL4 if not poly.in?(dest,:current)
+      #puts 'in'
+      return [:poly, dest, distance, ray]
     end
     return NIL4
   end
