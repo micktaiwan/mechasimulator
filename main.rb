@@ -107,7 +107,7 @@ class PlaneWorld < World
     if t - @t0 >= 1000
       seconds = (t - @t0) / 1000.0
       @fps = @frames / seconds
-      @ps.time_step = 1/@fps
+      @ps.time_step = 1/(@fps*CONFIG[:ps][:speed_factor])
       @t0, @frames = t, 0
       exit if defined? @autoexit and t >= 999.0 * @autoexit
     end

@@ -8,7 +8,7 @@ class DSL
   end
 
   def reload
-    @ps.clear_objects
+    @ps.clear
     begin
       eval(File.read('objects.rb'))
       @console.push "#{@ps.particles.size} particules reloaded"
@@ -146,6 +146,7 @@ class DSL
     c = p(p2.x,p2.y,p1.z)
     d = p(p1.x,p2.y,p1.z)
     attach(a,b,c,d)
+    surface a,b,c,d
 
     # up
     e = p(p1.x,p1.y,p2.z)
@@ -153,18 +154,23 @@ class DSL
     g = p(p2.x,p2.y,p2.z)
     h = p(p1.x,p2.y,p2.z)
     attach(e,f,g,h)
+    surface e,f,g,h
     
     # left
     attach(a,e,h,d)
+    surface a,e,h,d
     
     # right
     attach(b,f,g,c)
+    surface b,f,g,h
 
     # front
     attach(a,b,e,f)
+    surface a,b,e,f
 
     # rear
     attach(d,c,g,h)
+    surface d,c,g,h
   end
 
   

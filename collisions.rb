@@ -2,19 +2,30 @@
 
 require 'vector'
 require 'particle'
+require 'util'
 
 PLANE_FRONT     = 1
 PLANE_BACK      = -1
 PLANE_COINCIDE  = 0
+NIL3 = [nil,nil,nil]
 
 class Poly
 
+  attr_accessor :particles
+
   # get 3 particles
   def initialize(arr_of_particles)
-    @array = arr_of_particles
-    @p1 = @array[0]
-    @p2 = @array[1]
-    @p3 = @array[2]
+    @particles = arr_of_particles
+    @p1 = @particles[0]
+    @p2 = @particles[1]
+    @p3 = @particles[2]
+=begin    
+    # verify that all points are in the plane
+    return if @particles.size <= 3
+    3.upto(@particles.size) { |i|
+      raise "surface not plane" if not in?(@particles[i].current)      
+      }
+=end
   end
 
   def normal
@@ -50,7 +61,18 @@ class Poly
   end
   
   def angle(v1,v2)
-    Math.acos(v1.normalize.dot(v2.normalize))
+    d = v1.normalize.dot(v2.normalize)
+    if d > 0.99999
+      d = 0.9999
+    elsif d < -0.99999
+      d = -0.9999
+    end
+    begin
+      Math.acos(d)
+    rescue Exception=>e
+      puts d
+      raise
+    end
   end
   
   # determine if point is in the polygone
@@ -58,23 +80,24 @@ class Poly
   def in?(point)
     # sum all the angles
     sum = 0
-    @array.each_index { |i|
-      sum += angle((@array[i].current-point), (@array[i-1].current-point))
+    @particles.each_index { |i|
+      sum += angle((@particles[i].current - point), (@particles[i-1].current - point))
       }
     (sum-2*Math::PI).abs < 0.0000001
   end
   
   def collision?(p)
+    return NIL3 if include?(p)
     from = p.old
     dest = p.current
-    return [nil,nil] if classify(from) == classify(dest)
+    return NIL3 if classify(from) == classify(dest)
     point, distance, ray = intersection(from, dest)
-    return [nil,nil] if not in?(point)
+    return NIL3 if not in?(point)
     [point, distance, ray]
   end
   
   def include?(p)
-    @array.include?(p)
+    @particles.include?(p)
   end
   
 end
@@ -84,17 +107,19 @@ if __FILE__ == $0
 p1 = Particle.new(0,0,0)
 p2 = Particle.new(0,1,0)
 p3 = Particle.new(1,0,0)
+test = Particle.new(-1,0,0)
 poly = Poly.new([p1, p2, p3])
 
 from = MVector.new(1.7, 0.1, 1)
 dest = MVector.new(0.1, 0.1, -1)
 
+print "angle: ", poly.angle(test.current, p3.current).to_deg, "\n"
 print "normale:  ", poly.normal, "\n"
 print "from classif:  ", poly.classify(from), "\n"
 print "dest classif:  ", poly.classify(dest), "\n"
 print "distance: ", poly.dist_inter(from,dest).join(', '), "\n"
 print "intersection point: ", poly.intersection(from,dest), "\n"
-print "in: ", poly.in?(poly.intersection(from,dest)), "\n"
+print "in: ", poly.in?(poly.intersection(from,dest)[0]), "\n"
 
 end
 
