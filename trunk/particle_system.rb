@@ -333,7 +333,7 @@ private
   def move_poly(poly, point, distance, ray)
     poly.particles.each { |p|
       #print p.current, "=>"
-      p.current.z += 0.05
+      p.current = p.old
       #puts p.current
       }
   end
