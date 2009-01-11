@@ -7,7 +7,7 @@ require 'util'
 PLANE_FRONT     = 1
 PLANE_BACK      = -1
 PLANE_COINCIDE  = 0
-NIL3 = [nil,nil,nil]
+NIL4 = [nil, nil, nil, nil]
 
 class Poly
 
@@ -28,17 +28,17 @@ class Poly
 =end
   end
 
-  def normal
-    (@p1.current-@p2.current).cross(@p3.current-@p2.current)
+  def normal(pos)
+    (@p1.send(pos)-@p2.send(pos)).cross(@p3.send(pos)-@p2.send(pos))
   end
   
-  def plane_distance
+  def plane_distance(pos)
     # -n.p
-    normal.inverse.dot(@p2.current)
+    normal(pos).inverse.dot(@p2.send(pos))
   end
 
-  def classify(dest)
-    scalar = normal.dot(dest) + plane_distance
+  def classify(dest,pos)
+    scalar = normal(pos).dot(dest) + plane_distance(pos)
     return PLANE_FRONT if( scalar > 0.0 )
     return PLANE_BACK  if( scalar < 0.0 )
     return PLANE_COINCIDE
@@ -46,19 +46,54 @@ class Poly
   
   # return [distance to intersection, direction vector "ray"]
   # distance should awys be positive, except when there is no intersection with the place, we return -1
-  def dist_inter(from, dest)
+  def dist_inter_current(from, dest)
     ray = dest - from 
-    denom = normal.dot(ray)
+    denom = normal(:current).dot(ray)
     return [-1,ray] if denom.abs < 0.000001 # no intersection, normal and ray are perpendicular
-    t = -(normal.dot(from) + plane_distance )   / denom
+    t = -(normal(:current).dot(from) + plane_distance(:current) )   / denom
     [t, ray]
   end
+
+  
+  def ray_poly
+    sum = @particles.inject(MVector.new(0,0,0)) { |sum,p| 
+      sum += (p.current - p.old)
+      }
+    sum /= @particles.size    
+  end
+  
+  def make_poly(ray)
+    arr = @particles.map { |p| 
+      v = p.old+ray
+      Particle.new(v.x,v.y,v.z)
+      }
+    Poly.new(arr)
+  end
+  
+  # return [distance to intersection, direction vector "ray"]
+  # distance should awys be positive, except when there is no intersection with the place, we return -1
+  def dist_inter_poly(point)
+    ray = ray_poly 
+    denom = normal(:current).dot(ray)
+    return [-1,ray] if denom.abs < 0.000001 # no intersection, normal and ray are perpendicular
+    t = -(normal(:current).dot(point) + plane_distance(:current) )   / denom
+    [t, ray]
+  end
+
   
   # return [the point where the intersection occurs, distance, ray]
-  def intersection(from, dest)
-    dist, ray = dist_inter(from,dest) 
+  def intersection_point(from, dest)
+    dist, ray = dist_inter_current(from,dest) 
     [from + (ray * dist), dist, ray]
   end
+
+  # return [the point where the intersection occurs, distance, ray]
+  def intersection_poly(point)
+    dist, ray = dist_inter_poly(point) 
+    poly = make_poly(ray*dist)
+    [poly, dist, ray]
+  end
+
   
   def angle(v1,v2)
     d = v1.normalize.dot(v2.normalize)
@@ -77,23 +112,30 @@ class Poly
   
   # determine if point is in the polygone
   # point must be in the polygone plane !
-  def in?(point)
+  def in?(point,pos)
     # sum all the angles
     sum = 0
     @particles.each_index { |i|
-      sum += angle((@particles[i].current - point), (@particles[i-1].current - point))
+      sum += angle((@particles[i].send(pos) - point), (@particles[i-1].send(pos) - point))
       }
     (sum-2*Math::PI).abs < 0.0000001
   end
-  
+    
   def collision?(p)
-    return NIL3 if include?(p)
+    return NIL4 if include?(p)
     from = p.old
     dest = p.current
-    return NIL3 if classify(from) == classify(dest)
-    point, distance, ray = intersection(from, dest)
-    return NIL3 if not in?(point)
-    [point, distance, ray]
+    if (classify(from,:current) != classify(dest,:current))
+      point, distance, ray = intersection_point(from, dest)
+      return NIL4 if not in?(point,:current)
+      return [:particle, point, distance, ray]
+    elsif (classify(dest,:current) != classify(dest,:old))
+      poly, distance, ray = intersection_poly(dest)
+      puts poly
+      return NIL4 if not poly.in?(point,:current)
+      return [:poly, point, distance, ray]
+    end
+    return NIL4
   end
   
   def include?(p)
