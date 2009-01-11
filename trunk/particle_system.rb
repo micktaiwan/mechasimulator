@@ -319,8 +319,8 @@ private
     # skipping the poly if the particle is already a part of it (done in collision.rb)
     @particles.each { |p|
       @polys.each { |poly|
-        point, distance, ray = poly.collision?(p)
-        next if not point
+        type, point, distance, ray = poly.collision?(p)
+        next if not type
         # we have a collision !
         # p is moved
         p.current = p.old
@@ -333,7 +333,7 @@ private
   def move_poly(poly, point, distance, ray)
     poly.particles.each { |p|
       #print p.current, "=>"
-      p.current = p.old
+      p.current.z += 0.05
       #puts p.current
       }
   end
