@@ -6,8 +6,12 @@ require 'particle_system'
 require 'dsl'
 require 'controls'
 require 'joy'
+require 'trace'
+
 
 class PlaneWorld < World
+
+  attr_accessor :ps, :cam, :controls, :console, :traces
   
   def draw
     t = GLUT.Get(GLUT::ELAPSED_TIME)
@@ -36,6 +40,8 @@ class PlaneWorld < World
     else
       @controls.joy if @joy.present?
       @ps.next_step
+      @traces.record
+      @traces.trace
     end
 
     # draw particles and forces
@@ -119,6 +125,7 @@ class PlaneWorld < World
       when 13 # Enter
         @editing = @editing==true ? nil : true
       when 8 # Backspace
+        @traces.clear
         @dsl.reload
       when 32 # space
         CONFIG[:draw][:constraints] = CONFIG[:draw][:constraints]? nil : true
@@ -163,13 +170,14 @@ class PlaneWorld < World
       draw_grid
     GL.EndList()
 
-    @ps = ParticleSystem.new
-    @joy = Joy.new(CONFIG[:joy][:dev])
+    @ps       = ParticleSystem.new
+    @joy      = Joy.new(CONFIG[:joy][:dev])
     @controls = Controls.new(@joy)
-    @dsl = DSL.new(@ps, @console, @controls, @cam)
-    @dsl.reload 
-    @editing= nil
+    @traces   = TraceList.new
+    @editing  = nil
     @old_file_stat = nil
+    @dsl      = DSL.new(self) #, @ps, @console, @controls, @cam)
+    @dsl.reload
 
     err = GL.GetError
     raise "GL Error code: #{err}" if err != 0
