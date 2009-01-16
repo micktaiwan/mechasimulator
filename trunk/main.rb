@@ -154,8 +154,7 @@ class PlaneWorld < World
   def init
     GLUT.InitDisplayMode(GLUT::RGBA | GLUT::DEPTH | GLUT::DOUBLE)
     GLUT.InitWindowPosition(0, 0)
-    f = 4
-    GLUT.InitWindowSize(320*f,240*f)
+    GLUT.InitWindowSize(CONFIG[:draw][:screen_width],CONFIG[:draw][:screen_height])
     GLUT.CreateWindow('mecha')
     GL.ClearColor(0.0, 0.0, 0.0, 0.0)
     GL.ShadeModel(GL::SMOOTH)

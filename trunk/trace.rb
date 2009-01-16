@@ -30,9 +30,9 @@ class Trace
   def initialize(p, opt)
     @particle = p
     @points   = []
-    @step     = opt[:step] || 10
-    @max      = opt[:max] || 100
-    @join     = opt[:join]
+    @step     = (opt and opt[:step]) || 10
+    @max      = (opt and opt[:max]) || 100
+    @join     = (opt and opt[:join])
     @last     = 0
   end
   

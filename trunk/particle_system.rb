@@ -188,6 +188,7 @@ class ParticleSystem
   def add_constraint(type,particles,values=nil)
   
     if values == nil
+      # set some default values
       if type == :string
         d = particles[0].current - particles[1].current        
         values = Math.sqrt(d.dot(d))
@@ -256,6 +257,7 @@ class ParticleSystem
   end
   
 private
+
   def sort_constraints
     @constraints = @constraints.sort_by {|c|
       case c.type
@@ -265,15 +267,11 @@ private
       end
       } 
   end
-  
-private
-  
+   
   # Verlet integration step
   def verlet
     @particles.each do |p|
-      temp  = p.current
-      p.current += p.current-p.old+p.acc*@time_step*@time_step
-      p.old = temp
+      p.current, p.old = p.current+((p.current-p.old)+(p.acc*@time_step*@time_step)), p.current
     end
   end
   
@@ -323,9 +321,11 @@ private
         next if not type
         # we have a collision !
         # p is moved
-        p.current = p.old
+        tmp = p.current
+        p.current = point
+        p.old = tmp
         # poly is moved
-        move_poly(poly, point, distance, ray)
+        #move_poly(poly, point, distance, ray)
         }
       }
   end

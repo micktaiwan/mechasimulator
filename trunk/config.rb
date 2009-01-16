@@ -19,9 +19,11 @@ CONFIG = {
     },
   
   :draw => {
+    :screen_width => 800,
+    :screen_height => 600,
     :point_size  =>6,
     :constraints => true,
-    :forces => true
+    :forces => false
     },
     
   :cam => {
@@ -31,8 +33,8 @@ CONFIG = {
   
   :ps =>  { # particle system
     :speed_factor => 1, # no impact on FPS, 1 for normal, 10 for ten times slower, 0.5 for 2 times faster
-    :nb_iter=> 2, # impact on FPS, greater means better simulation, but slower display
-    :collisions => nil # nil or true 
+    :nb_iter=> 1, # impact on FPS, greater means better simulation, but slower display
+    :collisions => true # nil or true 
     }
   
 }

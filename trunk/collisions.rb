@@ -132,11 +132,11 @@ class Poly
       return NIL4 if not in?(point,:current)
       return [:particle, point, distance, ray]
       # detect moving poly
-    elsif (classify(dest,:current) != classify(dest,:old))
-      point, distance, ray = intersection_poly(dest)
+    #elsif (classify(dest,:current) != classify(dest,:old))
+    #  point, distance, ray = intersection_poly(dest)
       #return NIL4 if not poly.in?(dest,:current)
       #puts 'in'
-      return [:poly, dest, distance, ray]
+    #  return [:poly, dest, distance, ray]
     end
     return NIL4
   end
