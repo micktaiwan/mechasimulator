@@ -14,7 +14,7 @@ class DSL
       @world.console.push "#{@world.ps.particles.size} particules reloaded"
     rescue Exception => e
       @world.console.push "Error in the objects.rb file:\n*** #{e.message}"
-      #raise
+      raise
     end
   end
   
