@@ -87,7 +87,7 @@ class World
   
   def draw_grid
     GL::Begin(GL::LINES)
-      GL::Color(0.3,0.3,0.3)
+      GL::Color(0.3,0.3,0.3, 1)
       x = 40
       x.times do |i|
         v(i-x/2,-x/2,0)
@@ -102,13 +102,13 @@ class World
   def draw_arrows
     GL::LineWidth(3)
     GL::Begin(GL::LINES)
-    GL::Color(1, 0, 0)
+    GL::Color(1, 0, 0, 1)
     v(0,0,0)
     v(1,0,0)
-    GL::Color(0, 1, 0)
+    GL::Color(0, 1, 0, 1)
     v(0,0,0)
     v(0,1,0)
-    GL::Color(0, 0, 1)
+    GL::Color(0, 0, 1, 1)
     v(0,0,0)
     v(0,0,1)
     GL::End()  
