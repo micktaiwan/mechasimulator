@@ -1,43 +1,5 @@
 object
 
-  p(-1,0,2)
-  p(-2,0,2)
-  p(-2,0,0)
-  p(3,0,0)
-  p(3,0,1)
-
-  p(-1,2,2)
-  p(1,2,2)
-  p(-1,2,0)
-  p(3,2,0)  
-  p(3,2,1)      
-
-  string 0,1
-  string 1,4
-  string 3,4
-  string 2,3
-  string 0,2
-  string 5,6
-  string 5,7
-  string 6,9
-  string 9,8
-  string 7,8
-  string 7,2
-  string 5,0
-  string 6,1
-  string 9,4
-  string 8,3
-  string 8,7
-
-end_object
-
-#gravity :all
-
-return
-
-
-object
-
   a = p(-1, 0, 2)
   b = p(1, 0, 2)
   c = p(0.2, 0, 1)
