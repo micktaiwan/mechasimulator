@@ -53,7 +53,7 @@ class PlaneWorld < World
     GL::LineWidth(3)
     @ps.particles.each { |p|
       # particles
-      GL::Color(0.6, 0.6, 0.6)
+      GL::Color(0.6, 0.6, 0.6, 1.0)
       GL::Begin(GL::POINTS)
         v(p.current.x,p.current.y,p.current.z)
       GL::End()
@@ -63,11 +63,11 @@ class PlaneWorld < World
         next if f.type == :gravity
         case f.type
         when :motor
-          GL::Color(0.2, 0.8, 0.2)
+          GL::Color(0.2, 0.8, 0.2, 1.0)
         when :uni
-          GL::Color(0.2, 0.2, 0.8)
+          GL::Color(0.2, 0.2, 0.8, 1.0)
         else
-          GL::Color(0.8, 0.4, 0.2)
+          GL::Color(0.8, 0.4, 0.2, 1.0)
         end
         v = p.current+(f.vector)#/(9.81*2))
         GL::Begin(GL::LINES)
@@ -81,7 +81,7 @@ class PlaneWorld < World
 
     # draw constraints
     if(CONFIG[:draw][:constraints])
-      GL::Color(1,0,0)
+      GL::Color(1.0, 0.0, 0.0, 1.0)
       @ps.constraints.each { |c|
         next if c.type != :string
         GL::Begin(GL::LINES)
@@ -172,7 +172,9 @@ class PlaneWorld < World
     GL.Hint(GL::PERSPECTIVE_CORRECTION_HINT, GL::NICEST)
     GL.Enable(GL::DEPTH_TEST)
     GL.Enable(GL::NORMALIZE)
-    GL::Enable(GL::POINT_SMOOTH);
+    GL::Enable(GL::POINT_SMOOTH)
+    GL::Enable(GL::BLEND) # for the menu
+
 
     @ground_list = GL.GenLists(1)
     GL.NewList(@ground_list, GL::COMPILE)
@@ -199,7 +201,7 @@ private
 
   def draw_board
     enable_2D
-    GL::Color(0, 1, 0)
+    GL::Color(0, 1, 0, 1)
     #draw_control(0, @plane.inputs[:thrust], 10)
     #draw_control(1, @plane.lift.length, 0.01)
     #draw_control(2, @plane.drag.length, 0.01)
@@ -210,7 +212,7 @@ private
   def draw_console
     enable_2D
     # FPS
-    GL::Color(1, 1, 0)
+    GL::Color(1, 1, 0, 1)
     @console.text_out(10,@screen_height-30, GLUT_BITMAP_HELVETICA_18, @fps.to_i.to_s + " fps")
     @console.draw
     disable_2D
