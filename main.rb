@@ -37,14 +37,16 @@ class PlaneWorld < World
           @old_file_stat = d
         end
       end
-    elsif CONFIG[:draw][:menu]
-      @menu.draw
     else
       @controls.joy if @joy.present?
       @ps.next_step
       @traces.record
       @traces.trace
     end
+    draw_console
+    enable_2D
+    @menu.draw if CONFIG[:draw][:menu]
+    disable_2D
 
     # draw particles and forces
     GL::PointSize(CONFIG[:draw][:point_size])
@@ -94,7 +96,6 @@ class PlaneWorld < World
     # board
     #draw_board
     
-    draw_console
 
     # END
     GLUT.SwapBuffers()
@@ -122,6 +123,11 @@ class PlaneWorld < World
   end
   
   def key(k, x, y)
+    if CONFIG[:draw][:menu]
+      rv = @menu.key(k)
+      CONFIG[:draw][:menu] = nil if rv == :quit
+      return
+    end
     @controls.action(k.chr,1)
     case k
       when 13 # Enter
@@ -151,11 +157,6 @@ class PlaneWorld < World
         @cam.pos.x += 1
       when GLUT::KEY_F1
         CONFIG[:draw][:menu] = CONFIG[:draw][:menu]? nil : true
-        if(CONFIG[:draw][:menu])
-          enable_2D
-        else
-          disable_2D
-        end
     end
     super
   end
