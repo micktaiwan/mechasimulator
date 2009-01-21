@@ -7,7 +7,7 @@ require 'dsl'
 require 'controls'
 require 'joy'
 require 'trace'
-
+require 'openglmenu'
 
 class PlaneWorld < World
 
@@ -37,6 +37,8 @@ class PlaneWorld < World
           @old_file_stat = d
         end
       end
+    elsif CONFIG[:draw][:menu]
+      @menu.draw
     else
       @controls.joy if @joy.present?
       @ps.next_step
@@ -146,7 +148,14 @@ class PlaneWorld < World
       when GLUT::KEY_LEFT
         @cam.pos.x -= 1 
       when GLUT::KEY_RIGHT
-        @cam.pos.x += 1 
+        @cam.pos.x += 1
+      when GLUT::KEY_F1
+        CONFIG[:draw][:menu] = CONFIG[:draw][:menu]? nil : true
+        if(CONFIG[:draw][:menu])
+          enable_2D
+        else
+          disable_2D
+        end
     end
     super
   end
@@ -173,6 +182,7 @@ class PlaneWorld < World
     @joy      = Joy.new(CONFIG[:joy][:dev])
     @controls = Controls.new(@joy)
     @traces   = TraceList.new
+    @menu     = OpenGLMenu.new
     @editing  = nil
     @old_file_stat = nil
     @dsl      = DSL.new(self) #, @ps, @console, @controls, @cam)
