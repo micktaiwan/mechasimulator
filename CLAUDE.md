@@ -44,12 +44,13 @@ The `joystick` gem is optional for gamepad support.
 ### Constraint System
 - **Rod**: Maintains fixed distance between particles (rigid constraint)
 - **Fixed**: Locks particle position
-- **Boundary**: Restricts particle to region (e.g., `z > 0`)
+- **Boundary**: Restricts particle to region (e.g., `z > 0`) with optional bounce via `stickiness`
 - **Plane**: Locks one axis to a constant value for 2D motion (e.g., `y = 0.5`)
+- **Surface**: Collision polygon with bounce physics via `stickiness` parameter
 
 ### Force System
 - **Gravity**: Global downward force (-9.81 on z)
-- **Spring**: Elastic force between particles (Hooke's law: F = k × stretch)
+- **Spring**: Elastic force between particles (Hooke's law: F = k × stretch), with `max_stretch` limit
 - **Motor**: Rotational force around axis
 - **Uni**: Constant unidirectional force
 - **Gravit**: Particle-to-particle gravitational attraction
@@ -78,20 +79,23 @@ object :name           # Start object definition
   rod p1, p2           # Rigid distance constraint between particles
   rod :last_two        # Rigid constraint between last two particles
   spring p1, p2, k, c  # Elastic spring (k=stiffness, c=damping)
+  spring p1, p2, k, c, max_stretch: 2.0  # With max extension limit (default: 3.0 = 300%)
   fix p                # Fix particle position
   plane p, :y, 0.5     # Lock particle to plane y=0.5 (2D motion)
   boundary p, :z, :>, 0  # Constrain particle component
+  boundary p, :z, :>, 0, stickiness: 0.3  # With bounce (0=full bounce, 1=sticky)
   gravity p            # Apply gravity to particle
   uni p, [x, y, z]     # Constant force on particle
   motor p, center, axis, power  # Rotational force
   gravit p, toward     # Gravitational attraction
   box(v1, v2)          # Create box between two corners
   surface a, b, c, d   # Define collision surface
+  surface a, b, c, d, stickiness: 0.2  # With bounce (0=full bounce, 1=sticky)
 end_object
 
 # Outside objects:
 gravity :all           # Apply gravity to all particles
-boundary :all, :z, :>, 0  # Ground plane
+boundary :all, :z, :>, 0, stickiness: 0.3  # Ground plane with bounce
 follow p               # Camera follows particle
 trace p                # Draw particle trajectory
 control 'key', [objs], :method, value  # Map input to action
