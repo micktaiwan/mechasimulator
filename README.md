@@ -56,11 +56,12 @@ ruby main.rb
 |-------|--------|
 | **Mouse drag** | Rotate camera |
 | **Arrow keys** | Move camera |
-| **Enter** | Toggle edit mode (live reload) |
+| **Enter** | Toggle edit mode (pause + live reload) |
 | **Backspace** | Force reload objects.rb |
 | **Space** | Toggle constraint visualization |
 | **1** | Toggle camera follow |
 | **2** | Toggle force visualization |
+| **f** | Toggle fullscreen |
 | **F1** | Toggle menu |
 | **Escape** | Exit |
 
