@@ -75,20 +75,21 @@ class DSL
   # Spring: elastic force (Hooke's law) between two particles
   # stiffness: force per unit stretch (higher = stiffer, e.g., 50-500)
   # damping: reduces oscillation (optional, e.g., 0.5-5)
-  def spring p1, p2, stiffness, damping = 0.0
+  # max_stretch: max extension as multiplier of rest_length (default: 3.0 = 300%)
+  def spring(p1, p2, stiffness, damping = 0.0, max_stretch: 3.0)
     p1 = resolve(p1)
     p2 = resolve(p2)
     if p1.is_a?(Array) # :last_two
       return nil if p1[0].nil?
-      return @world.ps.add_spring(p1[0], p1[1], stiffness, damping)
+      return @world.ps.add_spring(p1[0], p1[1], stiffness, damping, nil, max_stretch)
     else
-      return @world.ps.add_spring(p1, p2, stiffness, damping)
+      return @world.ps.add_spring(p1, p2, stiffness, damping, nil, max_stretch)
     end
   end
 
-  def boundary p, a, b, c
+  def boundary(p, a, b, c, stickiness: 0.3)
     p = resolve(p)
-    @world.ps.c(:boundary,p,[a,b,c])
+    @world.ps.c(:boundary, p, [a, b, c, stickiness])
   end
 
   def plane p, axis, value
@@ -144,10 +145,10 @@ class DSL
     @world.traces.add(p, opt)
   end
   
-  def surface(*args)
+  def surface(*args, stickiness: 0.3)
     arr = []
-    args.each {|p| arr << resolve(p) }
-    @world.ps.add_poly(arr)
+    args.each { |p| arr << resolve(p) }
+    @world.ps.add_poly(arr, stickiness)
   end
   
   # Create a new vector (renamed from v() for clarity - v() in world.rb is GL.Vertex3d)

@@ -106,6 +106,10 @@ class Constraint
     @value[2]
   end
 
+  def boundary_stickiness
+    @value[3] || 0.3  # default stickiness if not specified
+  end
+
   def plane_axis
     @value[0]
   end
@@ -119,16 +123,19 @@ end
 # Spring: applies Hooke's law force between two particles
 # Unlike rod (position constraint), spring applies forces proportional to stretch
 class Spring
-  attr_accessor :p1, :p2, :rest_length, :stiffness, :damping
+  attr_accessor :p1, :p2, :rest_length, :stiffness, :damping, :max_stretch
 
   # stiffness (k): force per unit stretch (N/m)
   # damping (c): velocity damping coefficient (optional)
-  def initialize(p1, p2, rest_length, stiffness, damping = 0.0)
+  # max_stretch: maximum extension as multiplier of rest_length (e.g., 3.0 = 300%)
+  #              beyond this, force becomes quadratic to prevent infinite stretching
+  def initialize(p1, p2, rest_length, stiffness, damping = 0.0, max_stretch = 3.0)
     @p1 = p1
     @p2 = p2
     @rest_length = rest_length
     @stiffness = stiffness
     @damping = damping
+    @max_stretch = max_stretch
 
     # Warn if both particles are fixed (spring will have no effect)
     if @p1.invmass == 0 && @p2.invmass == 0
@@ -147,8 +154,18 @@ class Spring
     direction = delta / length
     stretch = length - @rest_length
 
-    # Hooke's law: F = k * stretch
-    force_magnitude = @stiffness * stretch
+    # Calculate max allowed length
+    max_length = @rest_length * @max_stretch
+
+    if length > max_length
+      # Beyond max: quadratic force (much stronger to prevent infinite stretch)
+      base_stretch = max_length - @rest_length
+      overshoot = length - max_length
+      force_magnitude = @stiffness * base_stretch + @stiffness * overshoot * overshoot * 10
+    else
+      # Normal Hooke's law: F = k * stretch
+      force_magnitude = @stiffness * stretch
+    end
 
     # Damping: relative velocity along spring direction
     if @damping > 0 && dt > 0
@@ -314,12 +331,13 @@ class ParticleSystem
   # Add a spring between two particles
   # stiffness: force per unit stretch (higher = stiffer)
   # damping: velocity damping (optional, reduces oscillation)
-  def add_spring(p1, p2, stiffness, damping = 0.0, rest_length = nil)
+  # max_stretch: max extension as multiplier of rest_length (default: 3.0 = 300%)
+  def add_spring(p1, p2, stiffness, damping = 0.0, rest_length = nil, max_stretch = 3.0)
     if rest_length.nil?
       d = p1.current - p2.current
       rest_length = Math.sqrt(d.dot(d))
     end
-    s = Spring.new(p1, p2, rest_length, stiffness, damping)
+    s = Spring.new(p1, p2, rest_length, stiffness, damping, max_stretch)
     @springs << s
     s
   end
@@ -344,8 +362,8 @@ class ParticleSystem
       }
   end
 
-  def add_poly(arr)
-    @polys << Poly.new(arr)
+  def add_poly(arr, stickiness = 0.3)
+    @polys << Poly.new(arr, stickiness)
   end
 
   def find_object_by_name(name)
@@ -474,19 +492,38 @@ private
     end
   end
 
-  # Boundary constraint (e.g., z > 0)
+  # Boundary constraint (e.g., z > 0) with optional bounce
   def satisfy_boundary_xpbd(c)
     p = c.particles
     axis = c.boundary_component
     comp = c.boundary_comparator
     limit = c.boundary_value
+    stickiness = c.boundary_stickiness
 
     pos_val = p.current.component_value(axis)
     violated = (comp == :>) ? (pos_val < limit) : (pos_val > limit)
     return unless violated
 
-    # Simple position correction
-    p.current.component_set(axis, limit)
+    # Get velocity component along this axis
+    velocity = p.current - p.old
+    v_axis = velocity.component_value(axis)
+
+    # Reflect velocity on this axis
+    # Normal direction: +1 if comp is :> (floor), -1 if comp is :< (ceiling)
+    normal_sign = (comp == :>) ? 1.0 : -1.0
+
+    # Reflected velocity = -v_axis (bounce back)
+    v_reflected = -v_axis
+
+    # Apply stickiness: 0 = full bounce, 1 = full stop
+    v_final = v_reflected * (1.0 - stickiness)
+
+    # Position correction with small offset to avoid re-collision
+    offset = normal_sign * 0.001
+    p.current.component_set(axis, limit + offset)
+
+    # Update old position for correct velocity (Verlet)
+    p.old.component_set(axis, limit + offset - v_final)
   end
 
   # Plane constraint (lock one axis)
@@ -506,16 +543,41 @@ private
   def detect_collisions
     # for each particle, find if a collision with a poly occurred
     # skipping the poly if the particle is already a part of it (done in collision.rb)
-    @particles.each { |p|
-      @polys.each { |poly|
+    @particles.each do |p|
+      @polys.each do |poly|
         type, point, distance, ray = poly.collision?(p)
         next if not type
-        # Collision detected - move particle to collision point
-        old_position = p.current
-        p.current = point
-        p.old = old_position
-        }
-      }
+
+        # Incoming velocity (Verlet: velocity is implicit)
+        velocity = p.current - p.old
+
+        # Normalized surface normal
+        n = poly.normalized_normal(:current)
+
+        # Ensure normal points toward where particle came from (opposite to velocity)
+        # If velocity and normal point same direction, flip normal
+        if velocity.dot(n) > 0
+          n = n * -1
+        end
+
+        # Normal component of velocity (now guaranteed negative since n points opposite to v)
+        v_dot_n = velocity.dot(n)
+        v_normal = n * v_dot_n
+
+        # Reflect velocity: v_reflected = v - 2 * v_normal
+        v_reflected = velocity - v_normal * 2
+
+        # Apply stickiness: 0 = full bounce, 1 = full stop
+        v_final = v_reflected * (1.0 - poly.stickiness)
+
+        # Push particle slightly off surface (in direction of corrected normal)
+        offset = n * 0.002
+
+        # Update positions for Verlet integration
+        p.current = point + offset
+        p.old = point + offset - v_final
+      end
+    end
   end
 
 end
