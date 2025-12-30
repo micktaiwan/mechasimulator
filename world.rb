@@ -1,7 +1,7 @@
-require 'rubygems' # for some it works without to load opengl
 require 'opengl'
-require 'camera'
-require 'console'
+require 'glut'
+require_relative 'camera'
+require_relative 'console'
 
 class World
 
@@ -12,7 +12,7 @@ class World
   def idle
     GLUT.PostRedisplay()
   end
-    
+
   def key(k, x, y)
     case k
       when 27 # Escape
@@ -42,36 +42,42 @@ class World
   def init
     raise 'override init'
   end
-  
-  def enable_2D
-    vPort = GL.GetIntegerv(GL_VIEWPORT)
 
-    GL.MatrixMode(GL_PROJECTION)
+  def enable_2D
+    viewport_buf = ' ' * 16
+    GL.GetIntegerv(GL::VIEWPORT, viewport_buf)
+    vPort = viewport_buf.unpack('i4')
+
+    GL.MatrixMode(GL::PROJECTION)
     GL.PushMatrix()
     GL.LoadIdentity()
 
     GL.Ortho(0, vPort[2], 0, vPort[3], -1, 1)
-    GL.MatrixMode(GL_MODELVIEW)
+    GL.MatrixMode(GL::MODELVIEW)
     GL.PushMatrix()
     GL.LoadIdentity()
   end
-  
+
   def disable_2D
-    GL.MatrixMode(GL_PROJECTION)
-    GL.PopMatrix()   
-    GL.MatrixMode(GL_MODELVIEW)
-    GL.PopMatrix()	
+    GL.MatrixMode(GL::PROJECTION)
+    GL.PopMatrix()
+    GL.MatrixMode(GL::MODELVIEW)
+    GL.PopMatrix()
   end
 
   def visible(vis)
-    GLUT.IdleFunc((vis == GLUT::VISIBLE ? method(:idle).to_proc : nil))
+    if vis == GLUT::VISIBLE
+      GLUT.IdleFunc(@idle_callback)
+    else
+      GLUT.IdleFunc(nil)
+    end
   end
 
   def mouse(button, state, x, y)
     @mouse = state
     @x0, @y0 = x, y
   end
-  
+
   def motion(x, y)
     if @mouse == GLUT::DOWN
       nx = (@x0 - x).to_f * CONFIG[:mouse][:speed_factor]
@@ -80,14 +86,14 @@ class World
     end
     @x0, @y0 = x, y
   end
-  
+
   def v(x,y,z)
-    GL::Vertex3d(x,y,z)
+    GL.Vertex3d(x,y,z)
   end
-  
+
   def draw_grid
-    GL::Begin(GL::LINES)
-      GL::Color(0.3,0.3,0.3, 1)
+    GL.Begin(GL::LINES)
+      GL.Color4f(0.3,0.3,0.3, 1)
       x = 40
       x.times do |i|
         v(i-x/2,-x/2,0)
@@ -95,24 +101,24 @@ class World
         v(-x/2,i-x/2,0)
         v(x/2,i-x/2,0)
       end
-    GL::End()
+    GL.End()
     draw_arrows
   end
 
   def draw_arrows
-    GL::LineWidth(3)
-    GL::Begin(GL::LINES)
-    GL::Color(1, 0, 0, 1)
+    GL.LineWidth(3)
+    GL.Begin(GL::LINES)
+    GL.Color4f(1, 0, 0, 1)
     v(0,0,0)
     v(1,0,0)
-    GL::Color(0, 1, 0, 1)
+    GL.Color4f(0, 1, 0, 1)
     v(0,0,0)
     v(0,1,0)
-    GL::Color(0, 0, 1, 1)
+    GL.Color4f(0, 0, 1, 1)
     v(0,0,0)
     v(0,0,1)
-    GL::End()  
-    GL::LineWidth(1)
+    GL.End()
+    GL.LineWidth(1)
   end
 
   def initialize(fov = 90.0)
@@ -124,15 +130,35 @@ class World
     @fps = 0
     @console = Console.new
 
-    GLUT.Init()
+    # Load GLUT library
+    GLUT.load_lib
+
+    # Initialize GLUT
+    argc = [0].pack('I')
+    argv = [''].pack('p')
+    GLUT.Init(argc, argv)
+
+    # Call subclass init (creates window and loads GL)
     init()
-    GLUT.DisplayFunc(method(:draw).to_proc)
-    GLUT.ReshapeFunc(method(:reshape).to_proc)
-    GLUT.KeyboardFunc(method(:key).to_proc)
-    GLUT.SpecialFunc(method(:special).to_proc)
-    GLUT.VisibilityFunc(method(:visible).to_proc)
-    GLUT.MouseFunc(method(:mouse).to_proc)
-    GLUT.MotionFunc(method(:motion).to_proc)
+
+    # Create callbacks
+    @display_callback = GLUT.create_callback(:GLUTDisplayFunc) { draw }
+    @reshape_callback = GLUT.create_callback(:GLUTReshapeFunc) { |w, h| reshape(w, h) }
+    @keyboard_callback = GLUT.create_callback(:GLUTKeyboardFunc) { |k, x, y| key(k, x, y) }
+    @special_callback = GLUT.create_callback(:GLUTSpecialFunc) { |k, x, y| special(k, x, y) }
+    @visibility_callback = GLUT.create_callback(:GLUTVisibilityFunc) { |vis| visible(vis) }
+    @mouse_callback = GLUT.create_callback(:GLUTMouseFunc) { |btn, state, x, y| mouse(btn, state, x, y) }
+    @motion_callback = GLUT.create_callback(:GLUTMotionFunc) { |x, y| motion(x, y) }
+    @idle_callback = GLUT.create_callback(:GLUTIdleFunc) { idle }
+
+    # Register callbacks
+    GLUT.DisplayFunc(@display_callback)
+    GLUT.ReshapeFunc(@reshape_callback)
+    GLUT.KeyboardFunc(@keyboard_callback)
+    GLUT.SpecialFunc(@special_callback)
+    GLUT.VisibilityFunc(@visibility_callback)
+    GLUT.MouseFunc(@mouse_callback)
+    GLUT.MotionFunc(@motion_callback)
   end
 
   def start

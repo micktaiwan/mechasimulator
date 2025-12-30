@@ -1,0 +1,123 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+MechaSimulator is a 3D physics simulation engine in Ruby using Verlet integration. It simulates particle systems with constraints and forces, visualized in real-time using OpenGL. Users define simulations via a custom DSL in `objects.rb`.
+
+## Running the Application
+
+```bash
+# Using Homebrew Ruby (recommended for modern macOS)
+/opt/homebrew/opt/ruby/bin/ruby main.rb
+
+# Or if Homebrew Ruby is in your PATH
+ruby main.rb
+```
+
+### Dependencies
+
+Install via Homebrew:
+```bash
+brew install ruby glfw
+```
+
+Install the Ruby gem:
+```bash
+/opt/homebrew/opt/ruby/bin/gem install opengl-bindings2
+```
+
+The `joystick` gem is optional for gamepad support.
+
+## Architecture
+
+### Core Physics (Verlet Integration)
+- `particle_system.rb` - Main simulation engine: force accumulation, Verlet step, constraint satisfaction
+- `particle.rb` - Particle with position (current/old for Verlet), mass, and forces
+- `vector.rb` - `MVector` class for 3D vector math
+
+### Constraint System
+- **String**: Maintains distance between particles (springs)
+- **Fixed**: Locks particle position
+- **Boundary**: Restricts particle to region (e.g., `z > 0`)
+
+### Force System
+- **Gravity**: Global downward force (-9.81 on z)
+- **Motor**: Rotational force around axis
+- **Uni**: Constant unidirectional force
+- **Gravit**: Particle-to-particle gravitational attraction
+
+### Rendering & UI
+- `world.rb` - Base OpenGL world class
+- `main.rb` - Entry point, `PlaneWorld` class extending World, main loop
+- `camera.rb` - Camera control and particle following
+- `console.rb` - On-screen text output
+- `openglmenu.rb` / `menu_config.rb` - Menu system
+
+### Input & DSL
+- `controls.rb` - Input-to-action mapping
+- `joy.rb` - Joystick wrapper
+- `dsl.rb` - DSL interpreter for `objects.rb`
+- `objects.rb` - Current simulation definition (user-editable)
+
+## DSL Reference
+
+Simulations are defined in `objects.rb` using these commands:
+
+```ruby
+object :name           # Start object definition
+  p(x, y, z)           # Create particle, returns reference
+  p(x, y, z, mass)     # Create particle with mass
+  string p1, p2        # Spring constraint between particles
+  string :last_two     # Spring between last two particles
+  fix p                # Fix particle position
+  boundary p, :z, :>, 0  # Constrain particle component
+  gravity p            # Apply gravity to particle
+  uni p, [x, y, z]     # Constant force on particle
+  motor p, center, axis, power  # Rotational force
+  gravit p, toward     # Gravitational attraction
+  box(v1, v2)          # Create box between two corners
+  surface a, b, c, d   # Define collision surface
+end_object
+
+# Outside objects:
+gravity :all           # Apply gravity to all particles
+boundary :all, :z, :>, 0  # Ground plane
+follow p               # Camera follows particle
+trace p                # Draw particle trajectory
+control 'key', [objs], :method, value  # Map input to action
+console "text"         # Display text
+v(x, y, z)             # Create vector
+find_particle(:obj, [x,y,z])  # Find particle by object name and position
+join :obj1, :obj2, [x,y,z], ...  # Join objects at points
+```
+
+Particle references: `:first`, `:last`, `:last_two`, or numeric index.
+
+## Key Controls
+
+- **Enter**: Toggle edit mode (live reload on save)
+- **Backspace**: Force reload `objects.rb`
+- **Space**: Toggle constraint visualization
+- **1**: Toggle camera follow
+- **2**: Toggle force visualization
+- **F1**: Toggle menu
+- **Escape**: Exit
+- **Mouse drag**: Rotate camera
+
+## Configuration
+
+Global settings in `config.rb` (`CONFIG` hash):
+- `:draw` - Screen size (800x600), point size, visualization toggles
+- `:ps` - Simulation speed factor, constraint iterations (`nb_iter`), collisions toggle
+- `:cam` - Follow mode, rotation distance
+- `:joy` - Joystick device path
+- `:mouse` - Speed factor
+
+## Development Workflow
+
+1. Edit `objects.rb` with simulation definition
+2. Run `ruby main.rb`
+3. Press **Backspace** to reload changes, or use edit mode (**Enter**) for live reload
+4. See `examples.txt` for DSL examples (excavator, pendulum, motors, etc.)

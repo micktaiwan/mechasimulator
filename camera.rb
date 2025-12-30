@@ -1,4 +1,4 @@
-require 'vector'
+require_relative 'vector'
 
 class Camera
   

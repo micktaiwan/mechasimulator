@@ -1,6 +1,6 @@
-require 'vector'
-require 'particle'
-require 'collisions'
+require_relative 'vector'
+require_relative 'particle'
+require_relative 'collisions'
 
 # helper class that respond to current
 class FalseParticule < MVector
@@ -143,7 +143,8 @@ class PSObject
   def[](i)
     @particles[i]
   end
-     
+   
+  
 end
 
 class ParticleSystem
