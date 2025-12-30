@@ -56,7 +56,7 @@ class MVector
   # Normalizes the vector in place.
   def normalize!
     l = length
-    raise "vector lenght is 0" if l == 0
+    raise "vector length is 0" if l == 0
     @x /= l
     @y /= l
     @z /= l
