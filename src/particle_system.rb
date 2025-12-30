@@ -76,6 +76,7 @@ class Constraint
   
   def initialize(t,p,v)
     raise "rod for 2 particules with same position" if t==:rod and p[0].current == p[1].current
+    raise "angle constraint requires 3 particles" if t==:angle and (!p.is_a?(Array) || p.size != 3)
     @type, @particles, @value = t, p, v
   end
   
@@ -115,6 +116,14 @@ class Constraint
   end
 
   def plane_value
+    @value[1]
+  end
+
+  def angle_min
+    @value[0]
+  end
+
+  def angle_max
     @value[1]
   end
 
@@ -404,9 +413,10 @@ private
     @constraints = @constraints.sort_by {|c|
       case c.type
       when :rod;      1
-      when :boundary; 2
-      when :plane;    3
-      when :fixed;    4
+      when :angle;    2
+      when :boundary; 3
+      when :plane;    4
+      when :fixed;    5
       end
       }
   end
@@ -455,6 +465,8 @@ private
       case c.type
       when :rod
         satisfy_rod_xpbd(c, alpha_tilde)
+      when :angle
+        satisfy_angle_xpbd(c, alpha_tilde)
       when :boundary
         satisfy_boundary_xpbd(c)
       when :plane
@@ -539,7 +551,113 @@ private
   def satisfy_fixed_xpbd(c)
     c.particles.current.from_a(c.value)
   end
-  
+
+  # XPBD angle constraint
+  # Constrains angle formed by p1-p2-p3 to [min_angle, max_angle]
+  # p2 is the pivot/vertex
+  def satisfy_angle_xpbd(c, alpha_tilde)
+    p1, p2, p3 = c.particles[0], c.particles[1], c.particles[2]
+    min_angle = c.angle_min
+    max_angle = c.angle_max
+
+    # Vectors from pivot to outer particles
+    v1 = p1.current - p2.current
+    v2 = p3.current - p2.current
+    len1 = v1.length
+    len2 = v2.length
+
+    # Minimum length to prevent gradient explosion
+    min_len = 0.05
+    return if len1 < 1e-8 || len2 < 1e-8
+
+    # Clamp lengths to prevent huge gradients when particles are too close
+    effective_len1 = [len1, min_len].max
+    effective_len2 = [len2, min_len].max
+
+    n1 = v1 / len1
+    n2 = v2 / len2
+
+    # Current angle via dot product
+    cos_angle = n1.dot(n2)
+    cos_angle = [[-1.0, cos_angle].max, 1.0].min
+    current_angle = Math.acos(cos_angle)
+
+    # Check if constraint satisfied
+    return if current_angle >= min_angle && current_angle <= max_angle
+
+    # Target angle
+    target_angle = current_angle < min_angle ? min_angle : max_angle
+    constraint_error = current_angle - target_angle
+
+    # Rotation axis (perpendicular to plane of v1, v2)
+    axis = v1.cross(v2)
+    axis_len = axis.length
+    if axis_len < 1e-8
+      axis = perpendicular_to(v1)
+    else
+      axis = axis / axis_len
+    end
+
+    # Perpendicular correction directions (tangent to rotation arc)
+    perp1 = axis.cross(n1)
+    perp3 = n2.cross(axis)
+
+    # Gradients for XPBD (dC/dp for each particle)
+    # For angle constraint: grad magnitude is 1/len for outer particles
+    # Use effective lengths to prevent explosion when particles are too close
+    grad1 = perp1 / effective_len1
+    grad3 = perp3 / effective_len2
+    # p2 receives opposite of both gradients (Newton's third law)
+    grad2 = (grad1 + grad3).inverse
+
+    # XPBD weighted mass
+    w1 = p1.invmass * grad1.sqr
+    w2 = p2.invmass * grad2.sqr
+    w3 = p3.invmass * grad3.sqr
+    w = w1 + w2 + w3
+    return if w < 1e-8
+
+    # Very high compliance for angle constraints (very soft)
+    angle_alpha_tilde = alpha_tilde * 1000.0
+
+    delta_lambda = constraint_error / (w + angle_alpha_tilde)
+
+    # Very small max correction
+    max_correction = 0.02
+    delta_lambda = [[delta_lambda, -max_correction].max, max_correction].min
+
+    # Skip if particles are too close (let springs resolve first)
+    return if len1 < min_len || len2 < min_len
+
+    # Apply corrections and preserve velocity (move old with current)
+    if p1.invmass > 0
+      corr1 = grad1 * (delta_lambda * p1.invmass)
+      p1.current = p1.current + corr1
+      p1.old = p1.old + corr1
+    end
+    if p2.invmass > 0
+      corr2 = grad2 * (delta_lambda * p2.invmass)
+      p2.current = p2.current + corr2
+      p2.old = p2.old + corr2
+    end
+    if p3.invmass > 0
+      corr3 = grad3 * (delta_lambda * p3.invmass)
+      p3.current = p3.current + corr3
+      p3.old = p3.old + corr3
+    end
+  end
+
+  # Helper: vector perpendicular to v (for collinear case)
+  def perpendicular_to(v)
+    if v.x.abs < v.y.abs && v.x.abs < v.z.abs
+      MVector.new(1, 0, 0).cross(v).normalize
+    elsif v.y.abs < v.z.abs
+      MVector.new(0, 1, 0).cross(v).normalize
+    else
+      MVector.new(0, 0, 1).cross(v).normalize
+    end
+  end
+
   def detect_collisions
     # for each particle, find if a collision with a poly occurred
     # skipping the poly if the particle is already a part of it (done in collision.rb)

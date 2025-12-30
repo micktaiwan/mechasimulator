@@ -104,6 +104,32 @@ class DSL
     @world.ps.c(:plane, p, [axis, value])
   end
 
+  # Angle constraint: limit angle formed by p1-p2(pivot)-p3
+  # Usage:
+  #   angle p1, p2, p3, min_deg, max_deg   # Range
+  #   angle p1, p2, p3, exact_deg          # Exact angle
+  #   angle :last_three, min_deg, max_deg  # Last 3 particles
+  def angle(p1, p2 = nil, p3 = nil, min_deg = nil, max_deg = nil)
+    if p1 == :last_three
+      particles = resolve(:last_three)
+      return nil if particles.nil? || particles.size < 3
+      min_deg, max_deg = p2, p3
+      max_deg = min_deg if max_deg.nil?
+      min_rad = min_deg * Math::PI / 180.0
+      max_rad = max_deg * Math::PI / 180.0
+      return @world.ps.c(:angle, particles, [min_rad, max_rad])
+    end
+
+    p1 = resolve(p1)
+    p2 = resolve(p2)
+    p3 = resolve(p3)
+    max_deg = min_deg if max_deg.nil?
+
+    min_rad = min_deg * Math::PI / 180.0
+    max_rad = max_deg * Math::PI / 180.0
+    @world.ps.c(:angle, [p1, p2, p3], [min_rad, max_rad])
+  end
+
   def console str
     @world.console.push str
   end
@@ -219,7 +245,8 @@ private
     return o[0]  if p==:first
     return o[-1] if p==:last
     return [o[-2], o[-1]] if p==:last_two
-    p    
+    return [o[-3], o[-2], o[-1]] if p==:last_three
+    p
   end
   
 end
