@@ -11,27 +11,26 @@ NIL4 = [nil, nil, nil, nil]
 
 class Poly
 
-  attr_accessor :particles
+  attr_accessor :particles, :stickiness
 
   # get 3 particles
-  def initialize(arr_of_particles)
+  # stickiness: 0.0 = full bounce, 1.0 = no bounce (sticky)
+  def initialize(arr_of_particles, stickiness = 0.3)
     @particles = arr_of_particles
+    @stickiness = stickiness
     @p1 = @particles[0]
     @p2 = @particles[1]
     @p3 = @particles[2]
-=begin    
-    # verify that all points are in the plane
-    return if @particles.size <= 3
-    3.upto(@particles.size) { |i|
-      raise "surface not plane" if not in?(@particles[i].current)      
-      }
-=end
   end
 
   def normal(pos)
     (@p1.send(pos)-@p2.send(pos)).cross(@p3.send(pos)-@p2.send(pos))
   end
-  
+
+  def normalized_normal(pos)
+    normal(pos).normalize
+  end
+
   def plane_distance(pos)
     # -n.p
     normal(pos).inverse.dot(@p2.send(pos))
