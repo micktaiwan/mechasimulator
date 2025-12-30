@@ -212,7 +212,7 @@ boundary :all, :z, :>, 0
 
 object
   fix a = p(0,0,1)
-  
+
   20.times {
     p(5-rand(10),5-rand(10),5-rand(10))
     gravit :last, a
@@ -220,6 +220,88 @@ object
     rod :last_two
     }
 end_object
+
+
+##########################################################
+# Bouncing ball on ground (stickiness parameter)
+# stickiness: 0 = full bounce, 1 = no bounce (sticky)
+
+object :bouncing_ball
+  p(0, 0, 3)  # Ball starts high
+end_object
+
+gravity :all
+boundary :all, :z, :>, 0, stickiness: 0.1  # Very bouncy ground (trampoline)
+# boundary :all, :z, :>, 0, stickiness: 0.5  # Normal ground
+# boundary :all, :z, :>, 0, stickiness: 0.9  # Sticky ground (sand)
+
+
+##########################################################
+# Collision surface with bounce (ramp)
+
+object :ramp
+  # Inclined plane
+  r1 = p(0, 0, 0.1)
+  r2 = p(2, 0, 0.1)
+  r3 = p(2, 2, 0.1)
+  r4 = p(0, 2, 1.5)  # Elevated corner
+
+  fix r1; fix r2; fix r3; fix r4
+  rod r1, r2; rod r2, r3; rod r3, r4; rod r4, r1
+
+  # Collision surface with bounce
+  # Vertex order determines normal direction (counter-clockwise = up)
+  surface r1, r4, r3, r2, stickiness: 0.2  # Bouncy ramp
+end_object
+
+object :ball
+  p(1, 1.5, 3)  # Ball above ramp
+end_object
+
+gravity :all
+boundary :all, :z, :>, 0, stickiness: 0.3
+
+
+##########################################################
+# Spring with max_stretch (centrifugal demo)
+# max_stretch prevents infinite extension under strong forces
+
+object :spinning_spring
+  center = p(0, 0, 1)
+  fix center
+
+  arm = p(0.5, 0, 1)
+  rod center, arm
+  motor arm, center, [0, 0, 1], 10  # Spin fast
+
+  # Spring with max extension limit
+  bob = p(0.5, 0, 0.5)
+  spring arm, bob, 50, 2, max_stretch: 2.0  # Max 200% extension
+  # Without max_stretch, the spring would stretch infinitely!
+end_object
+
+gravity :all
+
+
+##########################################################
+# Comparing springs with different max_stretch
+
+object :spring_comparison
+  # Stiff spring, no limit (default max_stretch: 3.0)
+  fix t1 = p(0, 0, 2)
+  b1 = p(0, 0, 1)
+  spring t1, b1, 100, 1
+  uni b1, [5, 0, 0]  # Pull sideways
+
+  # Same spring with tight limit
+  fix t2 = p(2, 0, 2)
+  b2 = p(2, 0, 1)
+  spring t2, b2, 100, 1, max_stretch: 1.5  # Max 150%
+  uni b2, [5, 0, 0]  # Same pull
+end_object
+
+gravity :all
+boundary :all, :z, :>, 0, stickiness: 0.3
 
 
 
