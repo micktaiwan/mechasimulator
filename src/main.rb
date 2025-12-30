@@ -40,6 +40,11 @@ class PlaneWorld < World
       end
     else
       @controls.joy if @joy.present?
+      # Calculate actual dt per frame for accurate physics
+      dt = (t - @last_physics_time) / 1000.0 / CONFIG[:ps][:speed_factor]
+      dt = 1/60.0 if dt <= 0 || dt > 0.1  # clamp to avoid instability
+      @ps.time_step = dt
+      @last_physics_time = t
       @ps.next_step
       @traces.record
       @traces.trace
@@ -127,7 +132,6 @@ class PlaneWorld < World
     if t - @t0 >= 1000
       seconds = (t - @t0) / 1000.0
       @fps = @frames / seconds
-      @ps.time_step = 1/(@fps*CONFIG[:ps][:speed_factor])
       @t0, @frames = t, 0
       exit if defined? @autoexit and t >= 999.0 * @autoexit
     end
@@ -240,6 +244,7 @@ class PlaneWorld < World
     @dsl      = DSL.new(self) #, @ps, @console, @controls, @cam)
     @dsl.reload
     @keys     = {}
+    @last_physics_time = GLUT.Get(GLUT::ELAPSED_TIME)
 
     # Callbacks for key release
     @special_up_callback = GLUT.create_callback(:GLUTSpecialUpFunc) { |k, x, y| special_up(k, x, y) }
@@ -270,6 +275,10 @@ private
     # FPS
     GL.Color4f(1, 1, 0, 1)
     @console.text_out(10,@screen_height-30, GLUT::BITMAP_HELVETICA_18, @fps.to_i.to_s + " fps")
+    # Energy
+    energy = @ps.total_energy
+    @console.text_out(10,@screen_height-50, GLUT::BITMAP_HELVETICA_18,
+      "E:%.1f K:%.1f P:%.1f" % [energy[:total], energy[:kinetic], energy[:potential]])
     @console.draw
     disable_2D
   end

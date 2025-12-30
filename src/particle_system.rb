@@ -105,7 +105,15 @@ class Constraint
   def boundary_value
     @value[2]
   end
-  
+
+  def plane_axis
+    @value[0]
+  end
+
+  def plane_value
+    @value[1]
+  end
+
 end
 
 #class CString < Constraint
@@ -153,7 +161,8 @@ class ParticleSystem
 
   def initialize(set_of_objects=[])
     @objects = set_of_objects
-    @time_step = 0 # shall absolutely be calculated and set before the sim start (in function of fps for example...)
+    @time_step = 1/60.0
+    @time_step_prev = 1/60.0
     @gravity = MVector.new(0,0,-9.81)
     @nb_iter = CONFIG[:ps][:nb_iter]
     @particles    = []
@@ -257,7 +266,30 @@ class ParticleSystem
   def optimize
     sort_constraints
   end
-  
+
+  def total_energy
+    ke = 0.0
+    pe = 0.0
+    g = 9.81
+    dt = @time_step_prev > 0 ? @time_step_prev : @time_step
+
+    @particles.each do |p|
+      next if p.invmass == 0  # skip fixed particles
+
+      mass = 1.0 / p.invmass
+
+      # Kinetic energy: 0.5 * m * v²
+      velocity = p.current - p.old
+      v_squared = velocity.dot(velocity) / (dt * dt)
+      ke += 0.5 * mass * v_squared
+
+      # Potential energy: m * g * z
+      pe += mass * g * p.current.z
+    end
+
+    { kinetic: ke, potential: pe, total: ke + pe }
+  end
+
 private
 
   def sort_constraints
@@ -265,16 +297,27 @@ private
       case c.type
       when :string;   1
       when :boundary; 2
-      when :fixed;    3
+      when :plane;    3
+      when :fixed;    4
       end
-      } 
+      }
   end
    
-  # Verlet integration step
+  # Time-Corrected Verlet integration step
   def verlet
+    dt = @time_step
+    dt_prev = @time_step_prev
+    dt_ratio = dt_prev > 0 ? dt / dt_prev : 1.0
+
     @particles.each do |p|
-      p.current, p.old = p.current+((p.current-p.old)+(p.acc*@time_step*@time_step)), p.current
+      next if p.invmass == 0  # skip fixed particles
+      velocity = (p.current - p.old) * dt_ratio
+      new_pos = p.current + velocity + (p.acc * dt * dt)
+      p.old = p.current
+      p.current = new_pos
     end
+
+    @time_step_prev = dt
   end
   
   # accumulate forces for each particle
@@ -308,6 +351,10 @@ private
         p = c.particles
         # read: p.current.z = 0 if not p.current.z > 0
         p.current.component_set(c.boundary_component,c.boundary_value) if not p.current.component_value(c.boundary_component).send(c.boundary_comparator, c.boundary_value)
+      when :plane
+        p = c.particles
+        p.current.component_set(c.plane_axis, c.plane_value)
+        p.old.component_set(c.plane_axis, c.plane_value)
       when :fixed
         c.particles.current.from_a(c.value)
       end # case

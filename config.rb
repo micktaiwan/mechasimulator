@@ -38,9 +38,9 @@ CONFIG = {
   :cam => {
     :follow => true,            # Camera follows particle (toggle with 1)
     :rotate => 0,               # Auto-rotation distance, 0 = disabled
-    :acceleration => 0.005,     # Speed boost per frame (when key held)
-    :turn_speed => 0.1,         # Rotation degrees per frame (when key held)
-    :friction => 0.95,          # Velocity damping (0.9-0.99, higher = more glide)
+    :acceleration => 0.001,     # Speed boost per frame (when key held)
+    :turn_speed => 0.015,         # Rotation degrees per frame (when key held)
+    :friction => 0.94,          # Velocity damping (0.9-0.99, higher = more glide)
     # Key bindings (AZERTY default, change for QWERTY: w/s/a/d)
     :key_forward => 'z',
     :key_backward => 's',
@@ -50,7 +50,7 @@ CONFIG = {
 
   # Particle system / physics
   :ps => {
-    :speed_factor => 1,         # Time scale: 1 = realtime, 0.5 = 2x faster, 2 = 2x slower
+    :speed_factor => 3,         # Time scale: 1 = realtime, 0.5 = 2x faster, 2 = 2x slower
     :nb_iter => 2,              # Constraint solver iterations per frame (2-20 typical)
                                 # Higher = more accurate but slower
                                 # Only affects simulations with constraints (string, fix, boundary)
