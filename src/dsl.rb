@@ -76,14 +76,21 @@ class DSL
   # stiffness: force per unit stretch (higher = stiffer, e.g., 50-500)
   # damping: reduces oscillation (optional, e.g., 0.5-5)
   # max_stretch: max extension as multiplier of rest_length (default: 3.0 = 300%)
-  def spring(p1, p2, stiffness, damping = 0.0, max_stretch: 3.0)
-    p1 = resolve(p1)
-    p2 = resolve(p2)
-    if p1.is_a?(Array) # :last_two
-      return nil if p1[0].nil?
-      return @world.ps.add_spring(p1[0], p1[1], stiffness, damping, nil, max_stretch)
+  # Usage:
+  #   spring :last_two, stiffness, damping
+  #   spring p1, p2, stiffness, damping
+  def spring(p1, p2, stiffness = nil, damping = 0.0, max_stretch: 3.0)
+    p1_resolved = resolve(p1)
+    if p1_resolved.is_a?(Array) # :last_two - arguments shift
+      # spring :last_two, stiffness, damping
+      actual_stiffness = p2
+      actual_damping = stiffness || 0.0
+      return nil if p1_resolved[0].nil?
+      return @world.ps.add_spring(p1_resolved[0], p1_resolved[1], actual_stiffness, actual_damping, nil, max_stretch)
     else
-      return @world.ps.add_spring(p1, p2, stiffness, damping, nil, max_stretch)
+      # spring p1, p2, stiffness, damping
+      p2_resolved = resolve(p2)
+      return @world.ps.add_spring(p1_resolved, p2_resolved, stiffness, damping, nil, max_stretch)
     end
   end
 
