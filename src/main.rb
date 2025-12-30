@@ -126,16 +126,16 @@ class PlaneWorld < World
     end
     
     # done after rotate so the cam still follow if told to do so
-    @cam.accelerate(CONFIG[:cam][:acceleration]) if @keys[:forward]
-    @cam.accelerate(-CONFIG[:cam][:acceleration]) if @keys[:backward]
-    @cam.elevate(CONFIG[:cam][:acceleration]) if @keys[:up]
-    @cam.elevate(-CONFIG[:cam][:acceleration]) if @keys[:down]
-    @cam.turn(-CONFIG[:cam][:turn_speed]) if @keys[:left]
-    @cam.turn(CONFIG[:cam][:turn_speed]) if @keys[:right]
-    @cam.strafe(-CONFIG[:cam][:acceleration]) if @keys[:strafe_left]
-    @cam.strafe(CONFIG[:cam][:acceleration]) if @keys[:strafe_right]
-    @cam.pitch(CONFIG[:cam][:turn_speed]) if @keys[:pitch_down]
-    @cam.pitch(-CONFIG[:cam][:turn_speed]) if @keys[:pitch_up]
+    @cam.accelerate(@cam_acceleration) if @keys[:forward]
+    @cam.accelerate(-@cam_acceleration) if @keys[:backward]
+    @cam.elevate(@cam_acceleration) if @keys[:up]
+    @cam.elevate(-@cam_acceleration) if @keys[:down]
+    @cam.turn(-@cam_turn_speed) if @keys[:left]
+    @cam.turn(@cam_turn_speed) if @keys[:right]
+    @cam.strafe(-@cam_acceleration) if @keys[:strafe_left]
+    @cam.strafe(@cam_acceleration) if @keys[:strafe_right]
+    @cam.pitch(@cam_turn_speed) if @keys[:pitch_down]
+    @cam.pitch(-@cam_turn_speed) if @keys[:pitch_up]
     @cam.update(@dt)
     @cam.follow if CONFIG[:cam][:follow]
 
@@ -268,6 +268,10 @@ class PlaneWorld < World
     GLUT.SpecialUpFunc(@special_up_callback)
     @key_up_callback = GLUT.create_callback(:GLUTKeyboardUpFunc) { |k, x, y| key_up(k, x, y) }
     GLUT.KeyboardUpFunc(@key_up_callback)
+
+    # Cache CONFIG values for hot loop performance
+    @cam_acceleration = CONFIG[:cam][:acceleration]
+    @cam_turn_speed = CONFIG[:cam][:turn_speed]
 
     err = GL.GetError
     raise "GL Error code: #{err}" if err != 0

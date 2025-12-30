@@ -5,7 +5,20 @@ class MVector
   def initialize(x=0,y=0,z=0)
       @x,@y,@z = x,y,z
   end
-  
+
+  # Create a copy of this vector
+  def copy
+    MVector.new(@x, @y, @z)
+  end
+
+  # Copy values from another vector (zero allocation)
+  def copy_from(other)
+    @x = other.x
+    @y = other.y
+    @z = other.z
+    self
+  end
+
   # helpers methods
   def component_set(component,value)
     send("#{component}=", value)
