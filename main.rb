@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/opt/homebrew/opt/ruby/bin/ruby
 #require 'profile'
 gem 'opengl-bindings2'
 require_relative 'config'
@@ -138,12 +138,24 @@ class PlaneWorld < World
         @dsl.reload
       when 32 # space
         CONFIG[:draw][:constraints] = CONFIG[:draw][:constraints]? nil : true
-      when '1'[0]
+      when '1'.ord
         CONFIG[:cam][:follow] = CONFIG[:cam][:follow]? nil : true
-      when '2'[0]
+      when '2'.ord
         CONFIG[:draw][:forces] = CONFIG[:draw][:forces]? nil : true
+      when 'f'.ord, 'F'.ord
+        toggle_fullscreen
     end
     super
+  end
+
+  def toggle_fullscreen
+    @fullscreen = !@fullscreen
+    if @fullscreen
+      GLUT.FullScreen()
+    else
+      GLUT.PositionWindow(0, 0)
+      GLUT.ReshapeWindow(@screen_width, @screen_height)
+    end
   end
 
   def special(k, x, y)
@@ -164,8 +176,12 @@ class PlaneWorld < World
   
   def init
     GLUT.InitDisplayMode(GLUT::RGBA | GLUT::DEPTH | GLUT::DOUBLE)
+    # Get screen size for maximized window
+    @screen_width = GLUT.Get(GLUT::SCREEN_WIDTH)
+    @screen_height = GLUT.Get(GLUT::SCREEN_HEIGHT)
+    @fullscreen = false
     GLUT.InitWindowPosition(0, 0)
-    GLUT.InitWindowSize(CONFIG[:draw][:screen_width],CONFIG[:draw][:screen_height])
+    GLUT.InitWindowSize(@screen_width, @screen_height)
     GLUT.CreateWindow('mecha')
 
     # Load GL after window/context is created
