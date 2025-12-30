@@ -112,7 +112,17 @@ class PlaneWorld < World
     end
     
     # done after rotate so the cam still follow if told to do so
+    @cam.accelerate(CONFIG[:cam][:acceleration]) if @keys[:up] || @keys[:forward]
+    @cam.accelerate(-CONFIG[:cam][:acceleration]) if @keys[:down] || @keys[:backward]
+    @cam.turn(-CONFIG[:cam][:turn_speed]) if @keys[:left]
+    @cam.turn(CONFIG[:cam][:turn_speed]) if @keys[:right]
+    @cam.strafe(-CONFIG[:cam][:acceleration]) if @keys[:strafe_left]
+    @cam.strafe(CONFIG[:cam][:acceleration]) if @keys[:strafe_right]
+    @cam.update
     @cam.follow if CONFIG[:cam][:follow]
+
+    # Apply held controls from objects.rb
+    @keys.each { |k, pressed| @controls.action(k, 1) if pressed && k.is_a?(String) }
    
     if t - @t0 >= 1000
       seconds = (t - @t0) / 1000.0
@@ -124,6 +134,12 @@ class PlaneWorld < World
   end
   
   def key(k, x, y)
+    chr = k.chr.downcase rescue nil
+    @keys[chr] = true if chr
+    @keys[:forward] = true if chr == CONFIG[:cam][:key_forward]
+    @keys[:backward] = true if chr == CONFIG[:cam][:key_backward]
+    @keys[:strafe_left] = true if chr == CONFIG[:cam][:key_strafe_left]
+    @keys[:strafe_right] = true if chr == CONFIG[:cam][:key_strafe_right]
     if CONFIG[:draw][:menu]
       rv = @menu.key(k)
       CONFIG[:draw][:menu] = nil if rv == :quit
@@ -148,6 +164,15 @@ class PlaneWorld < World
     super
   end
 
+  def key_up(k, x, y)
+    chr = k.chr.downcase rescue nil
+    @keys[chr] = false if chr
+    @keys[:forward] = false if chr == CONFIG[:cam][:key_forward]
+    @keys[:backward] = false if chr == CONFIG[:cam][:key_backward]
+    @keys[:strafe_left] = false if chr == CONFIG[:cam][:key_strafe_left]
+    @keys[:strafe_right] = false if chr == CONFIG[:cam][:key_strafe_right]
+  end
+
   def toggle_fullscreen
     @fullscreen = !@fullscreen
     if @fullscreen
@@ -159,19 +184,22 @@ class PlaneWorld < World
   end
 
   def special(k, x, y)
+    @keys[:up] = true if k == GLUT::KEY_UP
+    @keys[:down] = true if k == GLUT::KEY_DOWN
+    @keys[:left] = true if k == GLUT::KEY_LEFT
+    @keys[:right] = true if k == GLUT::KEY_RIGHT
     case k
-      when GLUT::KEY_UP
-        @cam.pos.y += 1 
-      when GLUT::KEY_DOWN
-        @cam.pos.y -= 1 
-      when GLUT::KEY_LEFT
-        @cam.pos.x -= 1 
-      when GLUT::KEY_RIGHT
-        @cam.pos.x += 1
       when GLUT::KEY_F1
         CONFIG[:draw][:menu] = CONFIG[:draw][:menu]? nil : true
     end
     super
+  end
+
+  def special_up(k, x, y)
+    @keys[:up] = false if k == GLUT::KEY_UP
+    @keys[:down] = false if k == GLUT::KEY_DOWN
+    @keys[:left] = false if k == GLUT::KEY_LEFT
+    @keys[:right] = false if k == GLUT::KEY_RIGHT
   end
   
   def init
@@ -211,6 +239,13 @@ class PlaneWorld < World
     @old_file_stat = nil
     @dsl      = DSL.new(self) #, @ps, @console, @controls, @cam)
     @dsl.reload
+    @keys     = {}
+
+    # Callbacks for key release
+    @special_up_callback = GLUT.create_callback(:GLUTSpecialUpFunc) { |k, x, y| special_up(k, x, y) }
+    GLUT.SpecialUpFunc(@special_up_callback)
+    @key_up_callback = GLUT.create_callback(:GLUTKeyboardUpFunc) { |k, x, y| key_up(k, x, y) }
+    GLUT.KeyboardUpFunc(@key_up_callback)
 
     err = GL.GetError
     raise "GL Error code: #{err}" if err != 0
