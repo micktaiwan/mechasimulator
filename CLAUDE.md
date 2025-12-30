@@ -10,10 +10,10 @@ MechaSimulator is a 3D physics simulation engine in Ruby using Verlet integratio
 
 ```bash
 # Using Homebrew Ruby (recommended for modern macOS)
-/opt/homebrew/opt/ruby/bin/ruby main.rb
+/opt/homebrew/opt/ruby/bin/ruby src/main.rb
 
 # Or if Homebrew Ruby is in your PATH
-ruby main.rb
+ruby src/main.rb
 ```
 
 ### Dependencies
@@ -33,9 +33,9 @@ The `joystick` gem is optional for gamepad support.
 ## Architecture
 
 ### Core Physics (Verlet Integration)
-- `particle_system.rb` - Main simulation engine: force accumulation, Verlet step, constraint satisfaction
-- `particle.rb` - Particle with position (current/old for Verlet), mass, and forces
-- `vector.rb` - `MVector` class for 3D vector math
+- `src/particle_system.rb` - Main simulation engine: force accumulation, Verlet step, constraint satisfaction
+- `src/particle.rb` - Particle with position (current/old for Verlet), mass, and forces
+- `src/vector.rb` - `MVector` class for 3D vector math
 
 ### Constraint System
 - **String**: Maintains distance between particles (springs)
@@ -49,17 +49,17 @@ The `joystick` gem is optional for gamepad support.
 - **Gravit**: Particle-to-particle gravitational attraction
 
 ### Rendering & UI
-- `world.rb` - Base OpenGL world class
-- `main.rb` - Entry point, `PlaneWorld` class extending World, main loop
-- `camera.rb` - Camera control and particle following
-- `console.rb` - On-screen text output
-- `openglmenu.rb` / `menu_config.rb` - Menu system
+- `src/world.rb` - Base OpenGL world class
+- `src/main.rb` - Entry point, `PlaneWorld` class extending World, main loop
+- `src/camera.rb` - Camera control and particle following
+- `src/console.rb` - On-screen text output
+- `src/openglmenu.rb` / `src/menu_config.rb` - Menu system
 
 ### Input & DSL
-- `controls.rb` - Input-to-action mapping
-- `joy.rb` - Joystick wrapper
-- `dsl.rb` - DSL interpreter for `objects.rb`
-- `objects.rb` - Current simulation definition (user-editable)
+- `src/controls.rb` - Input-to-action mapping
+- `src/joy.rb` - Joystick wrapper
+- `src/dsl.rb` - DSL interpreter for `objects.rb`
+- `objects.rb` - Current simulation definition (user-editable, at root)
 
 ## DSL Reference
 
@@ -118,6 +118,6 @@ Global settings in `config.rb` (`CONFIG` hash):
 ## Development Workflow
 
 1. Edit `objects.rb` with simulation definition
-2. Run `ruby main.rb`
+2. Run `ruby src/main.rb`
 3. Press **Backspace** to reload changes, or use edit mode (**Enter**) for live reload
 4. See `examples.txt` for DSL examples (excavator, pendulum, motors, etc.)

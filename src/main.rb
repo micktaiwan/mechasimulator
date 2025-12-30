@@ -1,7 +1,7 @@
 #!/opt/homebrew/opt/ruby/bin/ruby
 #require 'profile'
 gem 'opengl-bindings2'
-require_relative 'config'
+require_relative '../config'
 require_relative 'world'
 require_relative 'particle_system'
 require_relative 'dsl'
@@ -32,7 +32,7 @@ class PlaneWorld < World
     # ps
     if(@editing)
       if(t - @t0 >= 1000)
-        d = File.stat('objects.rb').mtime
+        d = File.stat(File.expand_path('../objects.rb', __dir__)).mtime
         if d != @old_file_stat
           @dsl.reload # reload objects
           @old_file_stat = d

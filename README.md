@@ -42,12 +42,12 @@ brew install ruby glfw
 ## Running
 
 ```bash
-/opt/homebrew/opt/ruby/bin/ruby main.rb
+/opt/homebrew/opt/ruby/bin/ruby src/main.rb
 ```
 
 Or if Homebrew Ruby is in your PATH:
 ```bash
-ruby main.rb
+ruby src/main.rb
 ```
 
 ## Controls
@@ -243,7 +243,7 @@ gravity :all
 
 ## Live Editing
 
-1. Run the simulator: `ruby main.rb`
+1. Run the simulator: `ruby src/main.rb`
 2. Press **Enter** to enable edit mode
 3. Modify `objects.rb` in your text editor
 4. Save the file - changes appear immediately!
@@ -262,14 +262,14 @@ Edit `config.rb` to change:
 
 | File | Purpose |
 |------|---------|
-| `main.rb` | Entry point, rendering, input handling |
+| `src/main.rb` | Entry point, rendering, input handling |
 | `objects.rb` | Your simulation definition (edit this!) |
-| `dsl.rb` | DSL interpreter |
-| `particle_system.rb` | Physics engine |
-| `particle.rb` | Particle class |
-| `vector.rb` | 3D vector math |
-| `world.rb` | OpenGL setup |
 | `config.rb` | Configuration |
+| `src/dsl.rb` | DSL interpreter |
+| `src/particle_system.rb` | Physics engine |
+| `src/particle.rb` | Particle class |
+| `src/vector.rb` | 3D vector math |
+| `src/world.rb` | OpenGL setup |
 | `examples.txt` | More DSL examples |
 
 ## License
