@@ -399,8 +399,8 @@ private
       next if p.invmass == 0  # skip fixed particles
       velocity = p.current - p.old
 
-      # Save current position as old (make a copy, not reference!)
-      p.old = MVector.new(p.current.x, p.current.y, p.current.z)
+      # Save current position as old (in-place copy, zero allocation)
+      p.old.copy_from(p.current)
 
       # Update position
       p.current = p.current + velocity + (p.acc * dt * dt)
