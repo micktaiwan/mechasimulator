@@ -119,6 +119,10 @@ fix :first                 # Fix the first particle of the object
 # Boundary constraint (restricts movement)
 boundary a, :z, :>, 0      # Particle 'a' must have z > 0 (ground plane)
 boundary :all, :z, :>, 0   # Apply to all particles
+
+# Plane constraint (locks one axis for 2D motion)
+plane a, :y, 0             # Particle 'a' moves only in XZ plane (y=0)
+plane a, :x, 1.5           # Particle 'a' moves only in YZ plane (x=1.5)
 ```
 
 ### Adding Forces
@@ -182,6 +186,25 @@ object :pendulum
 end_object
 
 gravity :all
+```
+
+### Double Pendulum (Chaotic Motion)
+
+```ruby
+object :double_pendulum
+  fix anchor = p(0, 0, 2)
+
+  pend1 = p(0, 0, 1.5)
+  string anchor, pend1
+  plane pend1, :y, 0       # Constrain to XZ plane
+
+  pend2 = p(0, 0, 1)
+  string pend1, pend2
+  plane pend2, :y, 0       # Constrain to XZ plane
+end_object
+
+gravity :all
+trace pend2                # Visualize chaotic trajectory
 ```
 
 ### Chain / Necklace

@@ -54,6 +54,7 @@ class DSL
   
   def fix p
     p = resolve(p)
+    p.fix_mass
     @world.ps.c(:fixed,p)
   end
   
@@ -72,7 +73,12 @@ class DSL
     p = resolve(p)
     @world.ps.c(:boundary,p,[a,b,c])
   end
-  
+
+  def plane p, axis, value
+    p = resolve(p)
+    @world.ps.c(:plane, p, [axis, value])
+  end
+
   def console str
     @world.console.push str
   end

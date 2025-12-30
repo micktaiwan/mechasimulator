@@ -17,6 +17,10 @@ class Particle
   def set_mass(m)
     @invmass = 1/m.to_f
   end
+
+  def fix_mass
+    @invmass = 0
+  end
   
   def add_force(type, values)
     @forces << Force.new(self, type, values)
@@ -24,6 +28,14 @@ class Particle
   
   def direction
     @current-@old
+  end
+
+  def push_x(value)
+    @current.x += value
+  end
+
+  def push_z(value)
+    @current.z += value
   end
 
 end

@@ -41,6 +41,7 @@ The `joystick` gem is optional for gamepad support.
 - **String**: Maintains distance between particles (springs)
 - **Fixed**: Locks particle position
 - **Boundary**: Restricts particle to region (e.g., `z > 0`)
+- **Plane**: Locks one axis to a constant value for 2D motion (e.g., `y = 0.5`)
 
 ### Force System
 - **Gravity**: Global downward force (-9.81 on z)
@@ -72,6 +73,7 @@ object :name           # Start object definition
   string p1, p2        # Spring constraint between particles
   string :last_two     # Spring between last two particles
   fix p                # Fix particle position
+  plane p, :y, 0.5     # Lock particle to plane y=0.5 (2D motion)
   boundary p, :z, :>, 0  # Constrain particle component
   gravity p            # Apply gravity to particle
   uni p, [x, y, z]     # Constant force on particle
