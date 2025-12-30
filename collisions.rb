@@ -1,8 +1,8 @@
 # http://www.flipcode.com/archives/Basic_Collision_Detection.shtml
 
-require 'vector'
-require 'particle'
-require 'util'
+require_relative 'vector'
+require_relative 'particle'
+require_relative 'util'
 
 PLANE_FRONT     = 1
 PLANE_BACK      = -1

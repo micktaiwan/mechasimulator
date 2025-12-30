@@ -1,13 +1,14 @@
 #!/usr/bin/ruby
 #require 'profile'
-require 'config'
-require 'world'
-require 'particle_system'
-require 'dsl'
-require 'controls'
-require 'joy'
-require 'trace'
-require 'openglmenu'
+gem 'opengl-bindings2'
+require_relative 'config'
+require_relative 'world'
+require_relative 'particle_system'
+require_relative 'dsl'
+require_relative 'controls'
+require_relative 'joy'
+require_relative 'trace'
+require_relative 'openglmenu'
 
 class PlaneWorld < World
 
@@ -17,13 +18,13 @@ class PlaneWorld < World
     t = GLUT.Get(GLUT::ELAPSED_TIME)
     # clear
     GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
-    GL::LoadIdentity()
+    GL.LoadIdentity()
     
     # camera
-    GL.Rotate(@cam.rot.x, 1.0, 0.0, 0.0)
-    GL.Rotate(@cam.rot.y, 0.0, 1.0, 0.0)
-    GL.Rotate(@cam.rot.z, 0.0, 0.0, 1.0)
-    GL.Translate(-@cam.pos.x, -@cam.pos.y, -@cam.pos.z)
+    GL.Rotatef(@cam.rot.x, 1.0, 0.0, 0.0)
+    GL.Rotatef(@cam.rot.y, 0.0, 1.0, 0.0)
+    GL.Rotatef(@cam.rot.z, 0.0, 0.0, 1.0)
+    GL.Translatef(-@cam.pos.x, -@cam.pos.y, -@cam.pos.z)
 
     # ground
     GL.CallList(@ground_list)
@@ -49,47 +50,47 @@ class PlaneWorld < World
     disable_2D
 
     # draw particles and forces
-    GL::PointSize(CONFIG[:draw][:point_size])
-    GL::LineWidth(3)
+    GL.PointSize(CONFIG[:draw][:point_size])
+    GL.LineWidth(3)
     @ps.particles.each { |p|
       # particles
-      GL::Color(0.6, 0.6, 0.6, 1.0)
-      GL::Begin(GL::POINTS)
+      GL.Color4f(0.6, 0.6, 0.6, 1.0)
+      GL.Begin(GL::POINTS)
         v(p.current.x,p.current.y,p.current.z)
-      GL::End()
+      GL.End()
       next if not CONFIG[:draw][:forces]
       # forces
       p.forces.each { |f|
         next if f.type == :gravity
         case f.type
         when :motor
-          GL::Color(0.2, 0.8, 0.2, 1.0)
+          GL.Color4f(0.2, 0.8, 0.2, 1.0)
         when :uni
-          GL::Color(0.2, 0.2, 0.8, 1.0)
+          GL.Color4f(0.2, 0.2, 0.8, 1.0)
         else
-          GL::Color(0.8, 0.4, 0.2, 1.0)
+          GL.Color4f(0.8, 0.4, 0.2, 1.0)
         end
         v = p.current+(f.vector)#/(9.81*2))
-        GL::Begin(GL::LINES)
+        GL.Begin(GL::LINES)
           v(p.current.x,p.current.y,p.current.z)
           v(v.x,v.y,v.z)
-        GL::End()
+        GL.End()
         }
       }
-    GL::PointSize(1)
-    GL::LineWidth(1)
+    GL.PointSize(1)
+    GL.LineWidth(1)
 
     # draw constraints
     if(CONFIG[:draw][:constraints])
-      GL::Color(1.0, 0.0, 0.0, 1.0)
+      GL.Color4f(1.0, 0.0, 0.0, 1.0)
       @ps.constraints.each { |c|
         next if c.type != :string
-        GL::Begin(GL::LINES)
+        GL.Begin(GL::LINES)
           p = c.particles[0]
           v(p.current.x,p.current.y,p.current.z)
           p = c.particles[1]
           v(p.current.x,p.current.y,p.current.z)
-        GL::End()
+        GL.End()
         }
     end
     
@@ -166,14 +167,18 @@ class PlaneWorld < World
     GLUT.InitWindowPosition(0, 0)
     GLUT.InitWindowSize(CONFIG[:draw][:screen_width],CONFIG[:draw][:screen_height])
     GLUT.CreateWindow('mecha')
+
+    # Load GL after window/context is created
+    GL.load_lib
+
     GL.ClearColor(0.0, 0.0, 0.0, 0.0)
     GL.ShadeModel(GL::SMOOTH)
     GL.DepthFunc(GL::LEQUAL)
     GL.Hint(GL::PERSPECTIVE_CORRECTION_HINT, GL::NICEST)
     GL.Enable(GL::DEPTH_TEST)
     GL.Enable(GL::NORMALIZE)
-    GL::Enable(GL::POINT_SMOOTH)
-    GL::Enable(GL::BLEND) # for the menu
+    GL.Enable(GL::POINT_SMOOTH)
+    GL.Enable(GL::BLEND) # for the menu
 
 
     @ground_list = GL.GenLists(1)
@@ -201,7 +206,7 @@ private
 
   def draw_board
     enable_2D
-    GL::Color(0, 1, 0, 1)
+    GL.Color4f(0, 1, 0, 1)
     #draw_control(0, @plane.inputs[:thrust], 10)
     #draw_control(1, @plane.lift.length, 0.01)
     #draw_control(2, @plane.drag.length, 0.01)
@@ -212,8 +217,8 @@ private
   def draw_console
     enable_2D
     # FPS
-    GL::Color(1, 1, 0, 1)
-    @console.text_out(10,@screen_height-30, GLUT_BITMAP_HELVETICA_18, @fps.to_i.to_s + " fps")
+    GL.Color4f(1, 1, 0, 1)
+    @console.text_out(10,@screen_height-30, GLUT::BITMAP_HELVETICA_18, @fps.to_i.to_s + " fps")
     @console.draw
     disable_2D
   end

@@ -1,5 +1,5 @@
 # helper class to simplify the definition language
-require 'particle_system'
+require_relative 'particle_system'
 
 class DSL
 
@@ -182,7 +182,7 @@ class DSL
 private
   def resolve p
     o = @current_object ? @current_object : @world.ps
-    return o[p] if p.class == Fixnum
+    return o[p] if p.class == Integer
     return o[0]  if p==:first
     return o[-1] if p==:last
     return [o[-2], o[-1]] if p==:last_two
