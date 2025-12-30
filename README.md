@@ -108,9 +108,13 @@ b = p(1, 0, 1)
 ### Adding Constraints
 
 ```ruby
-# String constraint (maintains distance between particles, like a spring)
-string a, b                # Connect two particles
-string :last_two           # Connect the last two created particles
+# Rod constraint (maintains fixed distance between particles, like a rigid rod)
+rod a, b                   # Connect two particles
+rod :last_two              # Connect the last two created particles
+
+# Spring (elastic force - Hooke's law)
+spring a, b, 100           # Spring with stiffness k=100
+spring a, b, 100, 2.0      # Spring with stiffness k=100 and damping c=2.0
 
 # Fixed constraint (locks a particle in place)
 fix a                      # Fix particle 'a' at its current position
@@ -176,17 +180,33 @@ trace :last                # Draw trajectory of last particle
 
 ## Examples
 
-### Simple Pendulum
+### Simple Pendulum (with rod)
 
 ```ruby
 object :pendulum
   fix p(0, 0, 2)           # Fixed point at top
   p(1, 0, 2)               # Swinging mass
-  string :last_two         # Connect them
+  rod :last_two            # Connect them (rigid)
 end_object
 
 gravity :all
 ```
+
+### Bouncy Pendulum (with spring)
+
+```ruby
+object :bouncy
+  fix p(0, 0, 2)           # Fixed point at top
+  p(1, 0, 2)               # Swinging mass
+  spring :last_two, 100, 1 # Connect with spring (k=100, damping=1)
+end_object
+
+gravity :all
+```
+
+**Rod vs Spring:**
+- **Rod**: Position constraint - maintains exact distance (rigid)
+- **Spring**: Force - pulls particles together proportional to stretch (elastic, oscillates)
 
 ### Double Pendulum (Chaotic Motion)
 
@@ -195,11 +215,11 @@ object :double_pendulum
   fix anchor = p(0, 0, 2)
 
   pend1 = p(0, 0, 1.5)
-  string anchor, pend1
+  rod anchor, pend1
   plane pend1, :y, 0       # Constrain to XZ plane
 
   pend2 = p(0, 0, 1)
-  string pend1, pend2
+  rod pend1, pend2
   plane pend2, :y, 0       # Constrain to XZ plane
 end_object
 
@@ -213,7 +233,7 @@ trace pend2                # Visualize chaotic trajectory
 object :chain
   20.times do |i|
     p(i * 0.1, 0, 3)       # Create particles in a line
-    string :last_two       # Connect each to the previous
+    rod :last_two          # Connect each to the previous
   end
   fix :first               # Fix the first particle
 end_object
@@ -228,7 +248,7 @@ object :arm
   base = p(0, 0, 0)
   fix base
   tip = p(1, 0, 1)
-  actuator = string base, tip
+  actuator = rod base, tip
 
   # Control with keyboard
   control 'o', [actuator], :add_length, -0.01
@@ -257,7 +277,7 @@ object :spinner
   center = p(0, 0, 2)
   fix center
   arm = p(1, 0, 2)
-  string center, arm
+  rod center, arm
   motor arm, center, [0, 0, 1], 10  # Rotate around Z-axis
 end_object
 
@@ -289,11 +309,15 @@ Edit `config.rb` to change:
 | `objects.rb` | Your simulation definition (edit this!) |
 | `config.rb` | Configuration |
 | `src/dsl.rb` | DSL interpreter |
-| `src/particle_system.rb` | Physics engine |
+| `src/particle_system.rb` | Physics engine (XPBD) |
 | `src/particle.rb` | Particle class |
 | `src/vector.rb` | 3D vector math |
 | `src/world.rb` | OpenGL setup |
 | `examples.txt` | More DSL examples |
+
+## Documentation
+
+- [XPBD Algorithm](docs/XPBD.md) - Extended Position Based Dynamics implementation details
 
 ## License
 

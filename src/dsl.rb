@@ -9,6 +9,9 @@ class DSL
 
   def reload
     @world.ps.clear
+    @world.controls.clear
+    @world.traces.clear
+    @world.cam.clear_follow
     begin
       eval(File.read(File.expand_path('../objects.rb', __dir__)))
       @world.console.push "#{@world.ps.particles.size} particules reloaded"
@@ -58,17 +61,31 @@ class DSL
     @world.ps.c(:fixed,p)
   end
   
-  def string p, p2=nil
+  def rod p, p2=nil
     p = resolve(p)
     if p2 == nil # default: p1 could be :last_two or an array
       return nil if p[0] == nil
-      return @world.ps.c(:string,p)
+      return @world.ps.c(:rod,p)
     else # user provided 2 points
       p2 = resolve(p2)
-      return @world.ps.c(:string,[p,p2])
+      return @world.ps.c(:rod,[p,p2])
     end
   end
-  
+
+  # Spring: elastic force (Hooke's law) between two particles
+  # stiffness: force per unit stretch (higher = stiffer, e.g., 50-500)
+  # damping: reduces oscillation (optional, e.g., 0.5-5)
+  def spring p1, p2, stiffness, damping = 0.0
+    p1 = resolve(p1)
+    p2 = resolve(p2)
+    if p1.is_a?(Array) # :last_two
+      return nil if p1[0].nil?
+      return @world.ps.add_spring(p1[0], p1[1], stiffness, damping)
+    else
+      return @world.ps.add_spring(p1, p2, stiffness, damping)
+    end
+  end
+
   def boundary p, a, b, c
     p = resolve(p)
     @world.ps.c(:boundary,p,[a,b,c])
@@ -138,13 +155,13 @@ class DSL
   end
   
   def attach(a,b,c,d)
-    string a,b
-    string b,c
-    string c,d
-    string d,a
+    rod a,b
+    rod b,c
+    rod c,d
+    rod d,a
 
-    string a,c
-    string b,d
+    rod a,c
+    rod b,d
   end
 
   def box(p1, p2)

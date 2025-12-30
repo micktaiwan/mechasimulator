@@ -24,7 +24,11 @@ class Controls
   end
   
   def <<(args)
-    @controls << Control.new(args[0],args[1],args[2],args[3]) 
+    @controls << Control.new(args[0],args[1],args[2],args[3])
+  end
+
+  def clear
+    @controls.clear
   end
   
   # receive a input and do the coresponding action

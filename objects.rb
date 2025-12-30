@@ -1,22 +1,28 @@
-object :double_pendulum
+# Pendulum chain with almost-rigid springs
+# Compare: left with rods, right with stiff springs
+# Planar motion (Y=0), start at angle to see gravity
 
-  fix anchor = p(0, 0, 2)
-  # plane anchor, :y, 0
+# Rod chain (left) - perfectly rigid
+object :rod_chain
+  15.times do |i|
+    p(-1 + i*0.15, 0, 3 + i*0.1)  # Rising diagonal in XZ plane
+    rod :last_two
+  end
+  fix :first
+end_object
 
-  pend = p(1, 0, 2)
-  s1 = string anchor, pend
-  # plane pend, :y, 0
-
-  pend2 = p(2, 0, 2)
-  string pend, pend2
-  # plane pend2, :y, 0
-
+# Spring chain (right) - very stiff
+object :spring_chain
+  prev = nil
+  15.times do |i|
+    curr = p(1 + i*0.15, 0, 3 + i*0.1)  # Rising diagonal in XZ plane
+    spring prev, curr, 1000, 10 if prev  # k=1000, c=10 (much stiffer)
+    prev = curr
+  end
+  fix :first
 end_object
 
 gravity :all
 
-trace pend2
-
-control 'o', [pend], :push_x, -0.005
-control 'p', [pend], :push_x,  0.005
- 
+console "Left (red): ROD chain"
+console "Right (green): SPRING chain - k=1000, c=10"

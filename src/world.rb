@@ -102,7 +102,6 @@ class World
         v(x/2,i-x/2,0)
       end
     GL.End()
-    draw_arrows
   end
 
   def draw_arrows

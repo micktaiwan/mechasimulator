@@ -16,6 +16,8 @@ class PlaneWorld < World
   
   def draw
     t = GLUT.Get(GLUT::ELAPSED_TIME)
+    @dt = (t - @last_frame_time) / 1000.0  # delta time in seconds
+    @last_frame_time = t
     # clear
     GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
     GL.LoadIdentity()
@@ -28,6 +30,7 @@ class PlaneWorld < World
 
     # ground
     GL.CallList(@ground_list)
+    draw_arrows if CONFIG[:draw][:axes]
 
     # ps
     if(@editing)
@@ -40,11 +43,8 @@ class PlaneWorld < World
       end
     else
       @controls.joy if @joy.present?
-      # Calculate actual dt per frame for accurate physics
-      dt = (t - @last_physics_time) / 1000.0 / CONFIG[:ps][:speed_factor]
-      dt = 1/60.0 if dt <= 0 || dt > 0.1  # clamp to avoid instability
-      @ps.time_step = dt
-      @last_physics_time = t
+      # Use fixed timestep for stable physics (variable dt breaks Verlet energy conservation)
+      @ps.time_step = 1/60.0 / CONFIG[:ps][:speed_factor]
       @ps.next_step
       @traces.record
       @traces.trace
@@ -85,16 +85,25 @@ class PlaneWorld < World
     GL.PointSize(1)
     GL.LineWidth(1)
 
-    # draw constraints
+    # draw constraints (rods in red)
     if(CONFIG[:draw][:constraints])
       GL.Color4f(1.0, 0.0, 0.0, 1.0)
       @ps.constraints.each { |c|
-        next if c.type != :string
+        next if c.type != :rod
         GL.Begin(GL::LINES)
           p = c.particles[0]
           v(p.current.x,p.current.y,p.current.z)
           p = c.particles[1]
           v(p.current.x,p.current.y,p.current.z)
+        GL.End()
+        }
+
+      # draw springs (in green)
+      GL.Color4f(0.0, 1.0, 0.0, 1.0)
+      @ps.springs.each { |s|
+        GL.Begin(GL::LINES)
+          v(s.p1.current.x, s.p1.current.y, s.p1.current.z)
+          v(s.p2.current.x, s.p2.current.y, s.p2.current.z)
         GL.End()
         }
     end
@@ -117,13 +126,17 @@ class PlaneWorld < World
     end
     
     # done after rotate so the cam still follow if told to do so
-    @cam.accelerate(CONFIG[:cam][:acceleration]) if @keys[:up] || @keys[:forward]
-    @cam.accelerate(-CONFIG[:cam][:acceleration]) if @keys[:down] || @keys[:backward]
+    @cam.accelerate(CONFIG[:cam][:acceleration]) if @keys[:forward]
+    @cam.accelerate(-CONFIG[:cam][:acceleration]) if @keys[:backward]
+    @cam.elevate(CONFIG[:cam][:acceleration]) if @keys[:up]
+    @cam.elevate(-CONFIG[:cam][:acceleration]) if @keys[:down]
     @cam.turn(-CONFIG[:cam][:turn_speed]) if @keys[:left]
     @cam.turn(CONFIG[:cam][:turn_speed]) if @keys[:right]
     @cam.strafe(-CONFIG[:cam][:acceleration]) if @keys[:strafe_left]
     @cam.strafe(CONFIG[:cam][:acceleration]) if @keys[:strafe_right]
-    @cam.update
+    @cam.pitch(CONFIG[:cam][:turn_speed]) if @keys[:pitch_down]
+    @cam.pitch(-CONFIG[:cam][:turn_speed]) if @keys[:pitch_up]
+    @cam.update(@dt)
     @cam.follow if CONFIG[:cam][:follow]
 
     # Apply held controls from objects.rb
@@ -144,6 +157,8 @@ class PlaneWorld < World
     @keys[:backward] = true if chr == CONFIG[:cam][:key_backward]
     @keys[:strafe_left] = true if chr == CONFIG[:cam][:key_strafe_left]
     @keys[:strafe_right] = true if chr == CONFIG[:cam][:key_strafe_right]
+    @keys[:pitch_down] = true if chr == CONFIG[:cam][:key_pitch_down]
+    @keys[:pitch_up] = true if chr == CONFIG[:cam][:key_pitch_up]
     if CONFIG[:draw][:menu]
       rv = @menu.key(k)
       CONFIG[:draw][:menu] = nil if rv == :quit
@@ -153,8 +168,7 @@ class PlaneWorld < World
     case k
       when 13 # Enter
         @editing = @editing==true ? nil : true
-      when 8 # Backspace
-        @traces.clear
+      when 8, 127 # Backspace (8 on Linux/Windows, 127 on macOS)
         @dsl.reload
       when 32 # space
         CONFIG[:draw][:constraints] = CONFIG[:draw][:constraints]? nil : true
@@ -175,6 +189,8 @@ class PlaneWorld < World
     @keys[:backward] = false if chr == CONFIG[:cam][:key_backward]
     @keys[:strafe_left] = false if chr == CONFIG[:cam][:key_strafe_left]
     @keys[:strafe_right] = false if chr == CONFIG[:cam][:key_strafe_right]
+    @keys[:pitch_down] = false if chr == CONFIG[:cam][:key_pitch_down]
+    @keys[:pitch_up] = false if chr == CONFIG[:cam][:key_pitch_up]
   end
 
   def toggle_fullscreen
@@ -244,7 +260,8 @@ class PlaneWorld < World
     @dsl      = DSL.new(self) #, @ps, @console, @controls, @cam)
     @dsl.reload
     @keys     = {}
-    @last_physics_time = GLUT.Get(GLUT::ELAPSED_TIME)
+    @last_frame_time = GLUT.Get(GLUT::ELAPSED_TIME)
+    @dt = 1.0/60.0
 
     # Callbacks for key release
     @special_up_callback = GLUT.create_callback(:GLUTSpecialUpFunc) { |k, x, y| special_up(k, x, y) }
@@ -275,10 +292,16 @@ private
     # FPS
     GL.Color4f(1, 1, 0, 1)
     @console.text_out(10,@screen_height-30, GLUT::BITMAP_HELVETICA_18, @fps.to_i.to_s + " fps")
-    # Energy
-    energy = @ps.total_energy
+    # Energy (update display only every 30 frames)
+    @energy_frame_count ||= 0
+    @energy_frame_count += 1
+    if @energy_frame_count >= 30
+      @energy_frame_count = 0
+      @cached_energy = @ps.total_energy
+    end
+    @cached_energy ||= @ps.total_energy
     @console.text_out(10,@screen_height-50, GLUT::BITMAP_HELVETICA_18,
-      "E:%.1f K:%.1f P:%.1f" % [energy[:total], energy[:kinetic], energy[:potential]])
+      "E:%.1f K:%.1f P:%.1f" % [@cached_energy[:total], @cached_energy[:kinetic], @cached_energy[:potential]])
     @console.draw
     disable_2D
   end

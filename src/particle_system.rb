@@ -70,12 +70,12 @@ end
 
 class Constraint
 
-  attr_accessor :type,      # :fixed, :string, :boundary
-                :particles, # particle, or [p1, p2] (for string)
-                :value      # can be [x,y,z] (for fixed) or a distance (for string) or a [coord, sup or inf, value] (for a boundary)
+  attr_accessor :type,      # :fixed, :rod, :boundary
+                :particles, # particle, or [p1, p2] (for rod)
+                :value      # can be [x,y,z] (for fixed) or a distance (for rod) or a [coord, sup or inf, value] (for a boundary)
   
   def initialize(t,p,v)
-    raise "string for 2 particules with same position" if t==:string and p[0].current == p[1].current
+    raise "rod for 2 particules with same position" if t==:rod and p[0].current == p[1].current
     @type, @particles, @value = t, p, v
   end
   
@@ -90,7 +90,7 @@ class Constraint
   end
   
   def add_length(value)
-    return if type != :string
+    return if type != :rod
     @value += value
   end 
   
@@ -116,8 +116,51 @@ class Constraint
 
 end
 
-#class CString < Constraint
-#end
+# Spring: applies Hooke's law force between two particles
+# Unlike rod (position constraint), spring applies forces proportional to stretch
+class Spring
+  attr_accessor :p1, :p2, :rest_length, :stiffness, :damping
+
+  # stiffness (k): force per unit stretch (N/m)
+  # damping (c): velocity damping coefficient (optional)
+  def initialize(p1, p2, rest_length, stiffness, damping = 0.0)
+    @p1 = p1
+    @p2 = p2
+    @rest_length = rest_length
+    @stiffness = stiffness
+    @damping = damping
+  end
+
+  # Apply spring forces to both particles
+  # F = -k * (length - rest_length) * direction
+  # F_damping = -c * relative_velocity_along_spring
+  def apply_forces(dt)
+    delta = @p2.current - @p1.current
+    length = delta.length
+    return if length < 1e-8
+
+    direction = delta / length
+    stretch = length - @rest_length
+
+    # Hooke's law: F = k * stretch
+    force_magnitude = @stiffness * stretch
+
+    # Damping: relative velocity along spring direction
+    if @damping > 0 && dt > 0
+      v1 = (@p1.current - @p1.old) / dt
+      v2 = (@p2.current - @p2.old) / dt
+      relative_velocity = v2 - v1
+      velocity_along_spring = relative_velocity.dot(direction)
+      force_magnitude += @damping * velocity_along_spring
+    end
+
+    force = direction * force_magnitude
+
+    # Apply equal and opposite forces (converted to acceleration)
+    @p1.acc = @p1.acc + (force * @p1.invmass) if @p1.invmass > 0
+    @p2.acc = @p2.acc - (force * @p2.invmass) if @p2.invmass > 0
+  end
+end
 
 # A ParticleSystem object is just a set of particle with constraints
 class PSObject
@@ -157,25 +200,30 @@ end
 
 class ParticleSystem
 
-  attr_accessor :time_step, :particles, :constraints
+  attr_accessor :time_step, :particles, :constraints, :springs
 
   def initialize(set_of_objects=[])
     @objects = set_of_objects
     @time_step = 1/60.0
-    @time_step_prev = 1/60.0
+    @dt_sub = 1/60.0/8  # Last substep dt used (for energy calculation)
     @gravity = MVector.new(0,0,-9.81)
-    @nb_iter = CONFIG[:ps][:nb_iter]
+    @num_substeps = CONFIG[:ps][:num_substeps] || 8
+    # Small compliance for numerical stability (0 can cause oscillations)
+    @compliance = CONFIG[:ps][:compliance] || 0.00001
     @particles    = []
-    @constraints  = []    
+    @constraints  = []
+    @springs      = []
     @polys        = []
   end
-  
+
   def clear
     @objects.clear
     @particles.clear
     @constraints.clear
+    @springs.clear
     @polys.clear
-    @nb_iter = CONFIG[:ps][:nb_iter]
+    @num_substeps = CONFIG[:ps][:num_substeps] || 8
+    @compliance = CONFIG[:ps][:compliance] || 0.00001
   end
   
   def <<(o)
@@ -188,10 +236,23 @@ class ParticleSystem
   end
   
   def next_step
-    accumulate_forces
-    verlet
-    @nb_iter.times do
-      satisfy_constraints
+    @dt_sub = @time_step / @num_substeps
+
+    if @dt_sub <= 0 || @dt_sub.nan?
+      puts "Invalid dt_sub: #{@dt_sub}, time_step=#{@time_step}, num_substeps=#{@num_substeps}"
+      exit(1)
+    end
+
+    @num_substeps.times do |substep|
+      # Recalculate forces each substep (important for springs!)
+      accumulate_forces
+
+      # Verlet integration for this substep
+      verlet_substep(@dt_sub)
+
+      # XPBD constraint solving (1 iteration per substep is enough)
+      satisfy_constraints_xpbd(@dt_sub)
+
       detect_collisions if CONFIG[:ps][:collisions]
     end
   end
@@ -200,8 +261,8 @@ class ParticleSystem
   
     if values == nil
       # set some default values
-      if type == :string
-        d = particles[0].current - particles[1].current        
+      if type == :rod
+        d = particles[0].current - particles[1].current
         values = Math.sqrt(d.dot(d))
       elsif type == :fixed
         values = particles.current.to_a
@@ -232,8 +293,21 @@ class ParticleSystem
       particles.add_force(type, values)
     end
   end
-  
+
   alias :f :add_force
+
+  # Add a spring between two particles
+  # stiffness: force per unit stretch (higher = stiffer)
+  # damping: velocity damping (optional, reduces oscillation)
+  def add_spring(p1, p2, stiffness, damping = 0.0, rest_length = nil)
+    if rest_length.nil?
+      d = p1.current - p2.current
+      rest_length = Math.sqrt(d.dot(d))
+    end
+    s = Spring.new(p1, p2, rest_length, stiffness, damping)
+    @springs << s
+    s
+  end
   
   def join(obj1, obj2, list)
     list.each { |arr|
@@ -271,7 +345,7 @@ class ParticleSystem
     ke = 0.0
     pe = 0.0
     g = 9.81
-    dt = @time_step_prev > 0 ? @time_step_prev : @time_step
+    dt = @dt_sub > 0 ? @dt_sub : @time_step / @num_substeps
 
     @particles.each do |p|
       next if p.invmass == 0  # skip fixed particles
@@ -279,6 +353,7 @@ class ParticleSystem
       mass = 1.0 / p.invmass
 
       # Kinetic energy: 0.5 * m * v²
+      # With XPBD substeps, (current - old) is velocity over one substep
       velocity = p.current - p.old
       v_squared = velocity.dot(velocity) / (dt * dt)
       ke += 0.5 * mass * v_squared
@@ -295,31 +370,28 @@ private
   def sort_constraints
     @constraints = @constraints.sort_by {|c|
       case c.type
-      when :string;   1
+      when :rod;      1
       when :boundary; 2
       when :plane;    3
       when :fixed;    4
       end
       }
   end
-   
-  # Time-Corrected Verlet integration step
-  def verlet
-    dt = @time_step
-    dt_prev = @time_step_prev
-    dt_ratio = dt_prev > 0 ? dt / dt_prev : 1.0
 
-    @particles.each do |p|
+  # Verlet integration for a single substep
+  def verlet_substep(dt)
+    @particles.each_with_index do |p, i|
       next if p.invmass == 0  # skip fixed particles
-      velocity = (p.current - p.old) * dt_ratio
-      new_pos = p.current + velocity + (p.acc * dt * dt)
-      p.old = p.current
-      p.current = new_pos
-    end
+      velocity = p.current - p.old
 
-    @time_step_prev = dt
+      # Save current position as old (make a copy, not reference!)
+      p.old = MVector.new(p.current.x, p.current.y, p.current.z)
+
+      # Update position
+      p.current = p.current + velocity + (p.acc * dt * dt)
+    end
   end
-  
+
   # accumulate forces for each particle
   def accumulate_forces
     @particles.each do |p|
@@ -333,33 +405,88 @@ private
         end
       end
     end
+
+    # Apply spring forces (Hooke's law)
+    @springs.each do |s|
+      s.apply_forces(@dt_sub)
+    end
   end
-  
-  # Here constraints are satisfied
-  def satisfy_constraints
-    @constraints.each do |c| # sorted by strings, boundaries, fixed
+
+  # XPBD constraint solving
+  def satisfy_constraints_xpbd(dt)
+    # Compliance term: α̃ = α / dt²
+    # α = 0 means infinitely stiff (rigid), α > 0 means soft
+    alpha_tilde = @compliance / (dt * dt)
+
+    @constraints.each do |c|
       case c.type
-      when :string
-        p1, p2 = c.particles[0], c.particles[1]
-        restlength = c.value
-        delta = p2.current - p1.current
-        deltalength = Math.sqrt(delta.dot(delta))
-        diff = (deltalength-restlength) / (deltalength*(p1.invmass+p2.invmass))
-        p1.current += delta*(diff*p1.invmass);
-        p2.current -= delta*(diff*p2.invmass);
+      when :rod
+        satisfy_rod_xpbd(c, alpha_tilde)
       when :boundary
-        p = c.particles
-        # read: p.current.z = 0 if not p.current.z > 0
-        p.current.component_set(c.boundary_component,c.boundary_value) if not p.current.component_value(c.boundary_component).send(c.boundary_comparator, c.boundary_value)
+        satisfy_boundary_xpbd(c)
       when :plane
-        p = c.particles
-        p.current.component_set(c.plane_axis, c.plane_value)
-        p.old.component_set(c.plane_axis, c.plane_value)
+        satisfy_plane_xpbd(c)
       when :fixed
-        c.particles.current.from_a(c.value)
-      end # case
-    end # constraints
-  end # function
+        satisfy_fixed_xpbd(c)
+      end
+    end
+  end
+
+  # XPBD distance constraint
+  def satisfy_rod_xpbd(c, alpha_tilde)
+    p1, p2 = c.particles[0], c.particles[1]
+    rest_length = c.value
+
+    delta = p2.current - p1.current
+    length = Math.sqrt(delta.dot(delta))
+    return if length < 1e-8
+
+    n = delta / length  # Unit direction
+    constraint_error = length - rest_length  # C(x)
+
+    w = p1.invmass + p2.invmass  # Sum of inverse masses
+    return if w < 1e-8
+
+    # XPBD formula: Δλ = C / (w + α̃)
+    delta_lambda = constraint_error / (w + alpha_tilde)
+
+    # Position corrections (only apply to non-fixed particles)
+    if p1.invmass > 0
+      p1.current = p1.current + (n * (delta_lambda * p1.invmass))
+    end
+    if p2.invmass > 0
+      p2.current = p2.current - (n * (delta_lambda * p2.invmass))
+    end
+  end
+
+  # Boundary constraint (e.g., z > 0)
+  def satisfy_boundary_xpbd(c)
+    p = c.particles
+    axis = c.boundary_component
+    comp = c.boundary_comparator
+    limit = c.boundary_value
+
+    pos_val = p.current.component_value(axis)
+    violated = (comp == :>) ? (pos_val < limit) : (pos_val > limit)
+    return unless violated
+
+    # Simple position correction
+    p.current.component_set(axis, limit)
+  end
+
+  # Plane constraint (lock one axis)
+  def satisfy_plane_xpbd(c)
+    p = c.particles
+    axis = c.plane_axis
+    target = c.plane_value
+
+    p.current.component_set(axis, target)
+  end
+
+  # Fixed constraint
+  def satisfy_fixed_xpbd(c)
+    c.particles.current.from_a(c.value)
+  end
   
   def detect_collisions
     # for each particle, find if a collision with a poly occurred

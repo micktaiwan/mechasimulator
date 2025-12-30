@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules
+
+- **All code, comments, and documentation must be in English.**
+
 ## Project Overview
 
 MechaSimulator is a 3D physics simulation engine in Ruby using Verlet integration. It simulates particle systems with constraints and forces, visualized in real-time using OpenGL. Users define simulations via a custom DSL in `objects.rb`.
@@ -38,13 +42,14 @@ The `joystick` gem is optional for gamepad support.
 - `src/vector.rb` - `MVector` class for 3D vector math
 
 ### Constraint System
-- **String**: Maintains distance between particles (springs)
+- **Rod**: Maintains fixed distance between particles (rigid constraint)
 - **Fixed**: Locks particle position
 - **Boundary**: Restricts particle to region (e.g., `z > 0`)
 - **Plane**: Locks one axis to a constant value for 2D motion (e.g., `y = 0.5`)
 
 ### Force System
 - **Gravity**: Global downward force (-9.81 on z)
+- **Spring**: Elastic force between particles (Hooke's law: F = k × stretch)
 - **Motor**: Rotational force around axis
 - **Uni**: Constant unidirectional force
 - **Gravit**: Particle-to-particle gravitational attraction
@@ -70,8 +75,9 @@ Simulations are defined in `objects.rb` using these commands:
 object :name           # Start object definition
   p(x, y, z)           # Create particle, returns reference
   p(x, y, z, mass)     # Create particle with mass
-  string p1, p2        # Spring constraint between particles
-  string :last_two     # Spring between last two particles
+  rod p1, p2           # Rigid distance constraint between particles
+  rod :last_two        # Rigid constraint between last two particles
+  spring p1, p2, k, c  # Elastic spring (k=stiffness, c=damping)
   fix p                # Fix particle position
   plane p, :y, 0.5     # Lock particle to plane y=0.5 (2D motion)
   boundary p, :z, :>, 0  # Constrain particle component
@@ -123,3 +129,7 @@ Global settings in `config.rb` (`CONFIG` hash):
 2. Run `ruby src/main.rb`
 3. Press **Backspace** to reload changes, or use edit mode (**Enter**) for live reload
 4. See `examples.txt` for DSL examples (excavator, pendulum, motors, etc.)
+
+## Documentation
+
+- `docs/XPBD.md` - XPBD algorithm explanation and implementation details
