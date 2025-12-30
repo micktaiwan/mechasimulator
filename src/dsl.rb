@@ -150,9 +150,11 @@ class DSL
     @world.ps.add_poly(arr)
   end
   
-  def v(x,y,z)
-    MVector.new(x,y,z)
+  # Create a new vector (renamed from v() for clarity - v() in world.rb is GL.Vertex3d)
+  def vec(x, y, z)
+    MVector.new(x, y, z)
   end
+  alias :v :vec  # Keep v() for backwards compatibility with examples
   
   def attach(a,b,c,d)
     rod a,b
@@ -210,15 +212,6 @@ private
     return o[-1] if p==:last
     return [o[-2], o[-1]] if p==:last_two
     p    
-  end
-  
-  # not used, dead code
-  def valid(*args)
-    args.each { |p|
-      p = resolve(p)
-      return nil if p == nil
-      }
-    true
   end
   
 end

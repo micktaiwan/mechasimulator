@@ -3,7 +3,7 @@ require_relative 'particle'
 require_relative 'collisions'
 
 # helper class that respond to current
-class FalseParticule < MVector
+class FalseParticle < MVector
   def current
     self
   end
@@ -36,7 +36,7 @@ class Force
       when :gravit
         calculate_gravit_force
       else
-        raise "ooops, type uknown: #{type}"
+        raise "oops, type unknown: #{type}"
     end
   end
   
@@ -62,7 +62,7 @@ private
   
   def resolve(v)
     if v.respond_to?(:current); return v
-    else; return FalseParticule.new(v[0],v[1],v[2])
+    else; return FalseParticle.new(v[0],v[1],v[2])
     end
   end
   
@@ -129,6 +129,11 @@ class Spring
     @rest_length = rest_length
     @stiffness = stiffness
     @damping = damping
+
+    # Warn if both particles are fixed (spring will have no effect)
+    if @p1.invmass == 0 && @p2.invmass == 0
+      warn "Warning: Spring between two fixed particles has no effect"
+    end
   end
 
   # Apply spring forces to both particles
@@ -257,10 +262,20 @@ class ParticleSystem
     end
   end
   
-  def add_constraint(type,particles,values=nil)
-  
-    if values == nil
-      # set some default values
+  # Add a constraint to the particle system
+  # @param type [Symbol] constraint type (:rod, :fixed, :boundary, :plane)
+  # @param particles [Array<Particle>, Particle, :all]
+  #   - :rod requires [p1, p2] array
+  #   - :fixed, :boundary, :plane require single particle (or :all)
+  # @param values [Object, nil] constraint parameters (auto-calculated if nil for :rod/:fixed)
+  def add_constraint(type, particles, values = nil)
+    # Validate particles parameter based on constraint type
+    if type == :rod
+      raise ArgumentError, "rod constraint requires [p1, p2] array" unless particles.is_a?(Array) && particles.size == 2
+    end
+
+    if values.nil?
+      # Set default values based on constraint type
       if type == :rod
         d = particles[0].current - particles[1].current
         values = Math.sqrt(d.dot(d))
@@ -495,23 +510,12 @@ private
       @polys.each { |poly|
         type, point, distance, ray = poly.collision?(p)
         next if not type
-        # we have a collision !
-        # p is moved
-        tmp = p.current
+        # Collision detected - move particle to collision point
+        old_position = p.current
         p.current = point
-        p.old = tmp
-        # poly is moved
-        #move_poly(poly, point, distance, ray)
+        p.old = old_position
         }
       }
   end
-  
-  def move_poly(poly, point, distance, ray)
-    poly.particles.each { |p|
-      #print p.current, "=>"
-      p.current = p.old
-      #puts p.current
-      }
-  end
-  
+
 end
