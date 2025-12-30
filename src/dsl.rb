@@ -122,7 +122,7 @@ class DSL
     list.each { |x,y,z|
       l << [x,y,z]
       }
-    @world.ps.join(@ps.find_object_by_name(name1),@ps.find_object_by_name(name2),l)
+    @world.ps.join(@world.ps.find_object_by_name(name1),@world.ps.find_object_by_name(name2),l)
   end
   
   def control(*args)
