@@ -166,6 +166,7 @@ class ParticleSystem
     @particles.clear
     @constraints.clear
     @polys.clear
+    @nb_iter = CONFIG[:ps][:nb_iter]
   end
   
   def <<(o)
