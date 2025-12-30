@@ -1,13 +1,43 @@
 require_relative 'vector'
 
 class Camera
-  
-  attr_accessor :pos, :view, :rot
-  
+
+  attr_accessor :pos, :view, :rot, :vel
+
   def initialize
     @pos  = MVector.new(1,-4,2)
     @rot  = MVector.new(-80,0,-10)
+    @vel  = 0.0
+    @strafe_vel = 0.0
+    @rot_vel = 0.0
     @follow = {:obj=>nil}
+  end
+
+  def accelerate(amount)
+    @vel += amount
+  end
+
+  def strafe(amount)
+    @strafe_vel += amount
+  end
+
+  def turn(angle)
+    @rot_vel += angle
+  end
+
+  def update
+    @rot.z += @rot_vel
+    @rot_vel *= CONFIG[:cam][:friction]
+
+    rad = @rot.z * Math::PI / 180
+    # Forward/backward
+    @pos.x += Math.sin(rad) * @vel
+    @pos.y += Math.cos(rad) * @vel
+    @vel *= CONFIG[:cam][:friction]
+    # Strafe (perpendicular)
+    @pos.x += Math.cos(rad) * @strafe_vel
+    @pos.y -= Math.sin(rad) * @strafe_vel
+    @strafe_vel *= CONFIG[:cam][:friction]
   end
   
   # rotx, roty: rotation along x and y
