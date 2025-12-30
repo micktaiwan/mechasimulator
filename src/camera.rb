@@ -5,11 +5,13 @@ class Camera
   attr_accessor :pos, :view, :rot, :vel
 
   def initialize
-    @pos  = MVector.new(1,-4,2)
+    @pos  = MVector.new(1,-8,2)
     @rot  = MVector.new(-80,0,-10)
     @vel  = 0.0
     @strafe_vel = 0.0
     @rot_vel = 0.0
+    @pitch_vel = 0.0
+    @vert_vel = 0.0
     @follow = {:obj=>nil}
   end
 
@@ -25,19 +27,36 @@ class Camera
     @rot_vel += angle
   end
 
-  def update
-    @rot.z += @rot_vel
-    @rot_vel *= CONFIG[:cam][:friction]
+  def pitch(amount)
+    @pitch_vel += amount
+  end
+
+  def elevate(amount)
+    @vert_vel += amount
+  end
+
+  def update(dt = 1.0/60.0)
+    # Scale factor: how many "60fps frames" worth of time has passed
+    scale = dt * 60.0
+
+    @rot.z += @rot_vel * scale
+    @rot_vel *= CONFIG[:cam][:friction] ** scale
+
+    @rot.x += @pitch_vel * scale
+    @pitch_vel *= CONFIG[:cam][:friction] ** scale
 
     rad = @rot.z * Math::PI / 180
     # Forward/backward
-    @pos.x += Math.sin(rad) * @vel
-    @pos.y += Math.cos(rad) * @vel
-    @vel *= CONFIG[:cam][:friction]
+    @pos.x += Math.sin(rad) * @vel * scale
+    @pos.y += Math.cos(rad) * @vel * scale
+    @vel *= CONFIG[:cam][:friction] ** scale
     # Strafe (perpendicular)
-    @pos.x += Math.cos(rad) * @strafe_vel
-    @pos.y -= Math.sin(rad) * @strafe_vel
-    @strafe_vel *= CONFIG[:cam][:friction]
+    @pos.x += Math.cos(rad) * @strafe_vel * scale
+    @pos.y -= Math.sin(rad) * @strafe_vel * scale
+    @strafe_vel *= CONFIG[:cam][:friction] ** scale
+    # Vertical (Z axis)
+    @pos.z += @vert_vel * scale
+    @vert_vel *= CONFIG[:cam][:friction] ** scale
   end
   
   # rotx, roty: rotation along x and y
@@ -62,6 +81,10 @@ class Camera
   # to do that we need to call a method that gives us a direction vector
   def set_follow(obj, obj_pos_method=nil, obj_dir_method=nil, opt=nil)
     @follow     = {:obj=>obj, :pos_m=>obj_pos_method, :dir_m=>obj_dir_method, :opt=>opt}
+  end
+
+  def clear_follow
+    @follow = {:obj=>nil}
   end
   
   def follow

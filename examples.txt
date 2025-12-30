@@ -29,16 +29,16 @@ join :upper, :end,   [2.2,1,1], [2.2,2,1]
 # then add some keyboard controlled hydraulic cylinder between the two
 p1 = find_particle(:lower,[1,1,1])
 p2 = find_particle(:upper,[1.2,1,1.2])
-actuator1 = string p1, p2
+actuator1 = rod p1, p2
 p1 = find_particle(:lower,[1,2,1])
 p2 = find_particle(:upper,[1.2,2,1.2])
-actuator2 = string p1, p2
+actuator2 = rod p1, p2
 p1 = find_particle(:upper,[2.2,1,1.2])
 p2 = find_particle(:end,[2.4,1,1])
-actuator3 = string p1, p2
+actuator3 = rod p1, p2
 p1 = find_particle(:upper,[2.2,2,1.2])
 p2 = find_particle(:end,[2.4,2,1])
-actuator4 = string p1, p2
+actuator4 = rod p1, p2
 # controls
 control 'o', [actuator1, actuator2], :add_length, -0.01
 control 'p', [actuator1, actuator2], :add_length,  0.01
@@ -61,7 +61,7 @@ console "A little excavator...."
 object
   20.times do |i|
     p(i*0.1,0, 3)
-    string :last_two # do nothing if only one last element
+    rod :last_two # do nothing if only one last element
   end
   fix   :first
 end_object
@@ -74,7 +74,7 @@ gravity :all
 object
   20.times do |i|
     p(-1+i*0.1,0,1)
-    string :last_two
+    rod :last_two
   end
   uni :first, [0,0,0.25]
   uni :last, [0,0,-0.2]
@@ -87,7 +87,7 @@ def snake(x)
   object
     20.times do |i|
       p(-1+i*0.1 + x/4.0,0,1)
-      string :last_two
+      rod :last_two
     end
     uni :first, [0,0,0.25]
     uni :last, [0,0,-0.2]
@@ -105,13 +105,13 @@ object
   
   l1   = p(1,2,1.7)
   l2   = p(-1,2,1.7)
-  a = string head, l1
-  b = string head, l2
+  a = rod head, l1
+  b = rod head, l2
   
   l3    = p(0,2,1)
   l3.set_mass 0.001
-  c = string l1,l3
-  d = string l2,l3
+  c = rod l1,l3
+  d = rod l2,l3
   
 
   uni   l2, [0,0,1]
@@ -132,7 +132,7 @@ FORCES
 object
   p(0,0,2)
   p(1,0,2)
-  string 0,1
+  rod 0,1
   uni 0, [0,0,9.81*2]
 end_object
 
@@ -145,7 +145,7 @@ object
   p(1,0,2)
   fix 0
 
-  string 0,1
+  rod 0,1
   motor 1, [0,0,2], [0,1,0], 9.81 + 0.2
 end_object
 
@@ -159,8 +159,8 @@ object
   p(0.2,0,1)
   p(0,0,1.5)
 
-  string 0,1
-  string 1,2
+  rod 0,1
+  rod 1,2
   boundary 2, :x, :>, -0.01
   boundary 2, :x, :<,  0.01
   boundary 2, :y, :>, -0.01
@@ -176,7 +176,7 @@ gravity :all
 def random
   x = 10
   p(rand(x)/10.0, rand(x)/10.0, rand(x)/10.0)
-  string :last_two
+  rod :last_two
 end
 
 object
@@ -193,7 +193,7 @@ boundary :all, :z, :>, 0
 # draft of a hot balloon
 def hot_particle(x, y, f)
   p(x, y, 2)
-  string :last, f
+  rod :last, f
   uni :last, [0,0,9.81*2]
 end
 
@@ -217,7 +217,7 @@ object
     p(5-rand(10),5-rand(10),5-rand(10))
     gravit :last, a
     uni :last, [rand(20)/10.0,rand(20)/10.0,rand(20)/10.0]
-    string :last_two
+    rod :last_two
     }
 end_object
 
