@@ -128,14 +128,14 @@ class PlaneWorld < World
     # done after rotate so the cam still follow if told to do so
     @cam.accelerate(@cam_acceleration) if @keys[:forward]
     @cam.accelerate(-@cam_acceleration) if @keys[:backward]
-    @cam.elevate(@cam_acceleration) if @keys[:up]
-    @cam.elevate(-@cam_acceleration) if @keys[:down]
+    @cam.elevate(@cam_acceleration) if @keys[:pitch_up]      # E = monter
+    @cam.elevate(-@cam_acceleration) if @keys[:pitch_down]   # A = descendre
     @cam.turn(-@cam_turn_speed) if @keys[:left]
     @cam.turn(@cam_turn_speed) if @keys[:right]
     @cam.strafe(-@cam_acceleration) if @keys[:strafe_left]
     @cam.strafe(@cam_acceleration) if @keys[:strafe_right]
-    @cam.pitch(@cam_turn_speed) if @keys[:pitch_down]
-    @cam.pitch(-@cam_turn_speed) if @keys[:pitch_up]
+    @cam.pitch(@cam_turn_speed) if @keys[:down]              # Flèche bas = regarder en bas
+    @cam.pitch(-@cam_turn_speed) if @keys[:up]               # Flèche haut = regarder en haut
     @cam.update(@dt)
     @cam.follow if CONFIG[:cam][:follow]
 
